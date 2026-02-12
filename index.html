@@ -235,15 +235,60 @@
             }, 1000);
         }
 
-        // --- TÌM KIẾM ---
+        // --- FIX: TÌM KIẾM ---
         async function searchMovies() {
             const input = document.getElementById('searchInput');
-            const kw = input.value.trim();
-            if (kw) {
-                showCategory(`tim-kiem?keyword=${kw}`, `Kết quả tìm kiếm: ${kw}`);
-                input.blur(); // Ẩn bàn phím ảo
+            // Encode để xử lý tiếng Việt và dấu cách
+            const rawKw = input.value.trim();
+            if (rawKw) {
+                // Sử dụng encodeURIComponent để tránh lỗi URL
+                const encodedKw = encodeURIComponent(rawKw); 
+                showCategory(`tim-kiem?keyword=${encodedKw}`, `Kết quả tìm kiếm: ${rawKw}`);
+                input.blur(); 
             } else {
                 alert("Vui lòng nhập tên phim!");
+            }
+        }
+        
+        // --- FIX: LOGIC LOAD TRANG ---
+        async function loadCategoryPage() {
+            const grid = document.getElementById('catGrid');
+            const spinner = document.getElementById('loadingSpinner');
+            grid.innerHTML = ''; spinner.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // LOGIC QUAN TRỌNG: Kiểm tra xem URL đã có dấu ? chưa để dùng & cho page
+            const separator = currentEndpoint.includes('?') ? '&' : '?';
+
+            try {
+                // Tải 2 trang để có nhiều phim
+                const [res1, res2] = await Promise.all([
+                    fetch(`${API}/${currentEndpoint}${separator}page=${currentPage}`).then(r=>r.json()).catch(()=>({})),
+                    fetch(`${API}/${currentEndpoint}${separator}page=${currentPage+1}`).then(r=>r.json()).catch(()=>({}))
+                ]);
+                
+                const movies = [...(res1.data?.items||[]), ...(res2.data?.items||[])].slice(0, 40);
+                
+                spinner.classList.add('hidden');
+                
+                if(movies.length === 0) { 
+                    grid.innerHTML='<p class="col-span-full text-center text-gray-500 text-lg mt-10">Không tìm thấy phim nào phù hợp.</p>'; 
+                    return; 
+                }
+                
+                grid.innerHTML = movies.map(m => createCard(m, true)).join('');
+                
+                const pag = document.getElementById('pagination');
+                // Nút Previous
+                if(currentPage > 1) pag.innerHTML += `<button onclick="changePage(${currentPage-2})" class="page-btn"><i class="fas fa-chevron-left"></i></button>`;
+                // Nút Current
+                pag.innerHTML += `<button class="page-btn active">${Math.ceil(currentPage/2)}</button>`;
+                // Nút Next
+                pag.innerHTML += `<button onclick="changePage(${currentPage+2})" class="page-btn"><i class="fas fa-chevron-right"></i></button>`;
+                
+            } catch { 
+                spinner.classList.add('hidden'); 
+                grid.innerHTML='<p class="col-span-full text-center text-red-500">Lỗi kết nối. Vui lòng thử lại.</p>'; 
             }
         }
 
@@ -381,34 +426,13 @@
             loadCategoryPage();
         }
 
-        async function loadCategoryPage() {
-            const grid = document.getElementById('catGrid');
-            const spinner = document.getElementById('loadingSpinner');
-            grid.innerHTML = ''; spinner.classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            try {
-                const [res1, res2] = await Promise.all([
-                    fetch(`${API}/${currentEndpoint}?page=${currentPage}`).then(r=>r.json()).catch(()=>({})),
-                    fetch(`${API}/${currentEndpoint}?page=${currentPage+1}`).then(r=>r.json()).catch(()=>({}))
-                ]);
-                const movies = [...(res1.data?.items||[]), ...(res2.data?.items||[])].slice(0, 40);
-                spinner.classList.add('hidden');
-                grid.innerHTML = movies.map(m => createCard(m, true)).join('');
-                
-                const pag = document.getElementById('pagination');
-                if(currentPage > 1) pag.innerHTML += `<button onclick="changePage(${currentPage-2})" class="page-btn"><i class="fas fa-chevron-left"></i></button>`;
-                pag.innerHTML += `<button class="page-btn active">${Math.ceil(currentPage/2)}</button>`;
-                pag.innerHTML += `<button onclick="changePage(${currentPage+2})" class="page-btn"><i class="fas fa-chevron-right"></i></button>`;
-            } catch { spinner.classList.add('hidden'); }
-        }
-
         function changePage(p) { currentPage = Math.max(1, p); loadCategoryPage(); }
         function toggleMobileMenu() { document.getElementById('mobileMenu').classList.toggle('translate-x-full'); document.getElementById('menuBackdrop').classList.toggle('hidden'); }
         function toggleSearchOverlay() { document.getElementById('searchOverlay').classList.toggle('hidden'); document.getElementById('searchOverlay').classList.toggle('flex'); }
         function toggleAccordion(id) { document.getElementById(id).classList.toggle('hidden'); document.getElementById(id).classList.toggle('grid'); }
         function mobileNav(action) { toggleMobileMenu(); setTimeout(() => eval(action), 300); }
-        function mobileSearch() { const kw = document.getElementById('mobileSearchInput').value; if(kw) { toggleSearchOverlay(); showCategory(`tim-kiem?keyword=${kw}`, `Tìm kiếm: ${kw}`); } }
+        function mobileSearch() { const kw = document.getElementById('mobileSearchInput').value; if(kw) { toggleSearchOverlay(); searchMovies(kw); } }
+        async function searchMoviesMobile(kw) { if(kw) showCategory(`tim-kiem?keyword=${encodeURIComponent(kw)}`, `Tìm kiếm: ${kw}`); }
 
         init();
     </script>
