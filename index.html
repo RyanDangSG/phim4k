@@ -428,5 +428,50 @@
 
         init();
     </script>
+    <style>
+    /* Hiệu ứng khi dùng Remote chọn vào phim */
+    :focus {
+        outline: 4px solid #e50914 !important; /* Viền đỏ đậm */
+        transform: scale(1.1) !important;
+        z-index: 100 !important;
+        box-shadow: 0 0 30px rgba(229, 9, 20, 0.8) !important;
+        border-radius: 4px;
+    }
+    /* Tắt viền cam mặc định của trình duyệt TV */
+    * { -webkit-tap-highlight-color: transparent; }
+</style>
+
+<script>
+    // Tự động thêm khả năng "bấm được" cho Remote
+    function makeTVFriendly() {
+        const items = document.querySelectorAll('a, button, input, .movie-card, .nav-item');
+        items.forEach(el => {
+            if (!el.getAttribute('tabindex')) {
+                el.setAttribute('tabindex', '0'); // Cho phép Remote chọn vào
+                el.classList.add('transition-all', 'duration-200'); // Thêm hiệu ứng mượt
+                
+                // Xử lý nút OK trên Remote
+                el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        el.click(); // Giả lập click chuột
+                    }
+                });
+            }
+        });
+    }
+
+    // Chạy liên tục để cập nhật khi phim mới được tải ra
+    setInterval(makeTVFriendly, 1000);
+    
+    // Tự động focus vào banner khi mới vào web
+    window.onload = () => {
+        setTimeout(() => {
+            const bannerBtn = document.querySelector('#bannerContent button');
+            if(bannerBtn) bannerBtn.focus();
+        }, 1000);
+    };
+</script>
 </body>
 </html>
+
