@@ -41,7 +41,7 @@
         .text-shadow { text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
         
         /* Focus cho TV Remote */
-        :focus { outline: 3px solid var(--primary); transform: scale(1.05); z-index: 50; }
+        :focus { outline: 3px solid var(--primary); transform: scale(1.05); z-index: 50; border-radius: 4px; }
         
         /* Pagination Buttons */
         .page-btn {
@@ -117,7 +117,7 @@
     <div id="menuBackdrop" onclick="toggleMobileMenu()" class="fixed inset-0 bg-black/80 z-[55] hidden backdrop-blur-sm"></div>
     
     <div id="searchOverlay" class="fixed top-0 left-0 w-full h-16 bg-[#141414] z-[70] hidden items-center px-4 border-b border-white/10">
-        <input id="mobileSearchInput" type="text" placeholder="Nhập tên phim..." class="flex-1 bg-transparent text-white border-none outline-none text-base h-full">
+        <input id="mobileSearchInput" type="text" placeholder="Nhập tên phim..." class="flex-1 bg-transparent text-white border-none outline-none text-base h-full" onkeydown="if(event.key === 'Enter') mobileSearch()">
         <button onclick="mobileSearch()" class="text-[#e50914] font-bold px-3 uppercase">Tìm</button>
         <button onclick="toggleSearchOverlay()" class="text-white px-2"><i class="fas fa-times"></i></button>
     </div>
@@ -205,7 +205,14 @@
 
     <script>
         const API = 'https://ophim1.com/v1/api';
-        const IMG_DOMAINS = ['https://img.ophim.live/uploads/movies/', 'https://phimimg.com/upload/poster/', 'https://img.otruyenapi.com/uploads/movies/'];
+        
+        // DANH SÁCH SERVER ẢNH (Ưu tiên server mới nhất của OPhim)
+        const IMG_DOMAINS = [
+            'https://img.ophim.live/uploads/movies/', 
+            'https://phimimg.com/upload/poster/', 
+            'https://img.otruyenapi.com/uploads/movies/'
+        ];
+        
         let currentEndpoint = '', currentPage = 1;
 
         async function init() {
@@ -219,16 +226,15 @@
             loadHomeRow('danh-sach/tv-shows', 'TV Shows Giải Trí');
             loadHomeRow('the-loai/hanh-dong', 'Hành Động Bom Tấn');
             
-            // Fix lỗi tìm kiếm Mobile
-            document.getElementById('mobileSearchInput').onkeypress = (e) => { if(e.key === 'Enter') mobileSearch(); };
-            
-            // Hỗ trợ Remote TV (Auto Focus)
+            // Hỗ trợ Remote TV (Auto Focus & Bấm OK)
             setInterval(() => {
-                document.querySelectorAll('a, button, .movie-card').forEach(el => {
+                document.querySelectorAll('a, button, .movie-card, input').forEach(el => {
                     if(!el.getAttribute('tabindex')) {
                         el.setAttribute('tabindex', '0');
                         el.addEventListener('keydown', (e) => { 
-                            if(e.key==='Enter') { e.preventDefault(); el.click(); } 
+                            if(e.key==='Enter') { 
+                                if(el.tagName !== 'INPUT') { e.preventDefault(); el.click(); }
+                            } 
                         });
                     }
                 });
@@ -238,30 +244,42 @@
         // --- FIX: TÌM KIẾM ---
         async function searchMovies() {
             const input = document.getElementById('searchInput');
-            // Encode để xử lý tiếng Việt và dấu cách
             const rawKw = input.value.trim();
             if (rawKw) {
-                // Sử dụng encodeURIComponent để tránh lỗi URL
+                // Encode URL để xử lý tiếng Việt có dấu và dấu cách
                 const encodedKw = encodeURIComponent(rawKw); 
-                showCategory(`tim-kiem?keyword=${encodedKw}`, `Kết quả tìm kiếm: ${rawKw}`);
+                showCategory(`tim-kiem?keyword=${encodedKw}`, `KẾT QUẢ TÌM KIẾM: ${rawKw.toUpperCase()}`);
                 input.blur(); 
             } else {
                 alert("Vui lòng nhập tên phim!");
             }
         }
+
+        function mobileSearch() {
+            const input = document.getElementById('mobileSearchInput');
+            const rawKw = input.value.trim();
+            if (rawKw) {
+                const encodedKw = encodeURIComponent(rawKw); 
+                toggleSearchOverlay(); 
+                showCategory(`tim-kiem?keyword=${encodedKw}`, `KẾT QUẢ TÌM KIẾM: ${rawKw.toUpperCase()}`);
+                input.blur();
+            }
+        }
         
-        // --- FIX: LOGIC LOAD TRANG ---
+        // --- FIX: LOGIC LOAD TRANG & PHÂN TRANG (Xử lý dấu ? và &) ---
         async function loadCategoryPage() {
             const grid = document.getElementById('catGrid');
             const spinner = document.getElementById('loadingSpinner');
             grid.innerHTML = ''; spinner.classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            // LOGIC QUAN TRỌNG: Kiểm tra xem URL đã có dấu ? chưa để dùng & cho page
+            // LOGIC QUAN TRỌNG: Kiểm tra xem URL đã có dấu ? chưa
+            // Ví dụ: tim-kiem?keyword=abc (đã có ?) -> nối thêm &page=1
+            // Ví dụ: danh-sach/phim-bo (chưa có ?) -> nối thêm ?page=1
             const separator = currentEndpoint.includes('?') ? '&' : '?';
 
             try {
-                // Tải 2 trang để có nhiều phim
+                // Fetch 2 trang liên tiếp để grid nhìn đầy đặn hơn
                 const [res1, res2] = await Promise.all([
                     fetch(`${API}/${currentEndpoint}${separator}page=${currentPage}`).then(r=>r.json()).catch(()=>({})),
                     fetch(`${API}/${currentEndpoint}${separator}page=${currentPage+1}`).then(r=>r.json()).catch(()=>({}))
@@ -278,29 +296,27 @@
                 
                 grid.innerHTML = movies.map(m => createCard(m, true)).join('');
                 
+                // Pagination Logic
                 const pag = document.getElementById('pagination');
-                // Nút Previous
                 if(currentPage > 1) pag.innerHTML += `<button onclick="changePage(${currentPage-2})" class="page-btn"><i class="fas fa-chevron-left"></i></button>`;
-                // Nút Current
                 pag.innerHTML += `<button class="page-btn active">${Math.ceil(currentPage/2)}</button>`;
-                // Nút Next
                 pag.innerHTML += `<button onclick="changePage(${currentPage+2})" class="page-btn"><i class="fas fa-chevron-right"></i></button>`;
                 
             } catch { 
                 spinner.classList.add('hidden'); 
-                grid.innerHTML='<p class="col-span-full text-center text-red-500">Lỗi kết nối. Vui lòng thử lại.</p>'; 
+                grid.innerHTML='<p class="col-span-full text-center text-red-500">Lỗi kết nối API. Vui lòng thử lại.</p>'; 
             }
         }
 
         // --- LỊCH SỬ XEM (LOCALSTORAGE) ---
         function saveHistory(movie) {
             let history = JSON.parse(localStorage.getItem('ryanphim_history')) || [];
-            history = history.filter(m => m.slug !== movie.slug); // Xóa trùng
+            history = history.filter(m => m.slug !== movie.slug);
             history.unshift({
                 slug: movie.slug, name: movie.name, thumb_url: movie.thumb_url,
                 year: movie.year, origin_name: movie.origin_name
             });
-            if(history.length > 50) history.pop(); // Giới hạn 50 phim
+            if(history.length > 50) history.pop();
             localStorage.setItem('ryanphim_history', JSON.stringify(history));
         }
 
@@ -308,7 +324,7 @@
             document.getElementById('homePage').classList.add('hidden');
             document.getElementById('playerArea').classList.add('hidden');
             document.getElementById('categoryPage').classList.remove('hidden');
-            document.getElementById('catTitle').innerText = "Lịch Sử Xem";
+            document.getElementById('catTitle').innerText = "LỊCH SỬ XEM PHIM";
             document.getElementById('pagination').innerHTML = ''; 
             
             const grid = document.getElementById('catGrid');
@@ -319,11 +335,11 @@
                 return;
             }
             grid.innerHTML = history.map(m => createCard(m, true)).join('');
-            document.getElementById('pagination').innerHTML = `<button onclick="clearHistory()" class="bg-red-600 text-white px-6 py-2 rounded font-bold hover:bg-red-700 transition">Xóa Lịch Sử</button>`;
+            document.getElementById('pagination').innerHTML = `<button onclick="clearHistory()" class="bg-red-600 text-white px-6 py-2 rounded font-bold hover:bg-red-700 transition">XÓA LỊCH SỬ</button>`;
         }
 
         function clearHistory() {
-            if(confirm('Xóa toàn bộ lịch sử xem phim?')) {
+            if(confirm('Bạn có chắc muốn xóa toàn bộ lịch sử xem phim?')) {
                 localStorage.removeItem('ryanphim_history');
                 showHistory();
             }
@@ -334,7 +350,7 @@
             try {
                 const res = await fetch(`${API}/phim/${slug}`).then(r=>r.json());
                 const item = res.data.item;
-                saveHistory(item); // Lưu lịch sử
+                saveHistory(item); // Lưu lịch sử khi bấm xem
 
                 document.getElementById('playerArea').classList.remove('hidden');
                 document.getElementById('playTitle').innerText = item.name;
@@ -346,11 +362,14 @@
                 
                 document.getElementById('mainIframe').src = item.episodes[0].server_data[0].link_embed;
                 document.getElementById('playerArea').scrollIntoView({behavior:'smooth', block:'start'});
-            } catch(e) {}
+            } catch(e) { alert("Phim này hiện đang bảo trì, vui lòng chọn phim khác!"); }
         }
 
-        // --- CÁC HÀM HỖ TRỢ KHÁC ---
-        function getImgUrl(u) { return u.includes('http') ? u : `${IMG_DOMAINS[0]}${u}`; }
+        // --- CÁC HÀM HỖ TRỢ XỬ LÝ ẢNH ---
+        function getImgUrl(u) { 
+            if(!u) return 'https://via.placeholder.com/300x450?text=No+Image';
+            return u.includes('http') ? u : `${IMG_DOMAINS[0]}${u}`; 
+        }
         function handleImgError(e) { 
             const s = e.src;
             if(s.includes(IMG_DOMAINS[0])) e.src = s.replace(IMG_DOMAINS[0], IMG_DOMAINS[1]);
@@ -375,23 +394,31 @@
             document.getElementById('bannerImg').src = getImgUrl(top.thumb_url);
             document.getElementById('bannerContent').innerHTML = `
                 <div class="animate-fade-in-up">
-                    <span class="bg-[#e50914] text-white text-xs font-bold px-2 py-1 rounded uppercase">Trending #1</span>
-                    <h2 class="text-3xl md:text-7xl font-black text-white my-4 uppercase leading-none drop-shadow-xl text-shadow">${top.name}</h2>
-                    <p class="text-gray-300 text-sm md:text-lg mb-6 hidden md:block max-w-xl font-medium">${top.origin_name} | ${top.year}</p>
-                    <button onclick="playPhim('${top.slug}')" class="bg-white text-black px-8 py-3 rounded font-bold hover:bg-[#e50914] hover:text-white transition uppercase text-sm flex items-center gap-2 shadow-lg"><i class="fas fa-play"></i> Xem Ngay</button>
+                    <span class="bg-[#e50914] text-white text-[10px] md:text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">Top Trending</span>
+                    <h2 class="text-3xl md:text-7xl font-black text-white my-4 uppercase leading-none drop-shadow-xl text-shadow line-clamp-2">${top.name}</h2>
+                    <p class="text-gray-300 text-sm md:text-lg mb-6 hidden md:block max-w-xl font-medium line-clamp-2">${top.origin_name} | ${top.year}</p>
+                    <button onclick="playPhim('${top.slug}')" class="bg-white text-black px-8 py-3.5 rounded font-bold hover:bg-[#e50914] hover:text-white transition uppercase text-sm flex items-center gap-2 shadow-lg"><i class="fas fa-play"></i> Xem Ngay</button>
                 </div>`;
         }
 
         async function loadHomeRow(endpoint, title) {
             const res = await fetch(`${API}/${endpoint}?page=1`).then(r=>r.json());
-            const movies = res.data.items;
+            const movies = res.data.items || [];
+            if(movies.length === 0) return;
             const id = `sec_${endpoint.replace(/\//g,'')}`;
             document.getElementById('homeSections').innerHTML += `
                 <div class="group relative" id="${id}">
-                    <h2 class="text-xl md:text-2xl font-bold text-white mb-4 flex items-center gap-2 cursor-pointer hover:text-[var(--primary)] transition" onclick="showCategory('${endpoint}', '${title}')">
-                        <span class="w-1 h-6 bg-[#e50914] rounded-full"></span> ${title} <i class="fas fa-chevron-right text-xs opacity-50"></i>
-                    </h2>
-                    <div class="flex gap-3 overflow-x-auto hide-scroll snap-x pb-4 px-1 scroll-smooth" id="${id}_row">${movies.map(m => createCard(m)).join('')}</div>
+                    <div class="flex justify-between items-end mb-4 px-2">
+                        <h2 class="text-xl md:text-2xl font-bold text-white cursor-pointer hover:text-[#e50914] transition flex items-center gap-2" onclick="showCategory('${endpoint}', '${title}')">
+                            <span class="w-1 h-6 bg-[#e50914] rounded-full"></span> ${title} <i class="fas fa-chevron-right text-xs opacity-50 ml-1"></i>
+                        </h2>
+                        <span class="text-xs text-gray-400 font-bold uppercase cursor-pointer hover:text-white bg-[#222] px-2 py-1 rounded border border-white/10" onclick="showCategory('${endpoint}', '${title}')">Xem tất cả</span>
+                    </div>
+                    <div class="relative group/slider">
+                        <button class="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-12 h-full bg-gradient-to-r from-black to-transparent opacity-0 group-hover/slider:opacity-100 transition hidden md:flex items-center justify-start pl-2" onclick="document.getElementById('${id}_row').scrollBy({left:-window.innerWidth*0.7,behavior:'smooth'})"><i class="fas fa-chevron-left text-4xl text-white hover:text-[var(--primary)] transition drop-shadow-lg"></i></button>
+                        <div class="flex gap-3 md:gap-4 overflow-x-auto hide-scroll snap-x pb-4 px-1 scroll-smooth" id="${id}_row">${movies.map(m => createCard(m)).join('')}</div>
+                        <button class="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-12 h-full bg-gradient-to-l from-black to-transparent opacity-0 group-hover/slider:opacity-100 transition hidden md:flex items-center justify-end pr-2" onclick="document.getElementById('${id}_row').scrollBy({left:window.innerWidth*0.7,behavior:'smooth'})"><i class="fas fa-chevron-right text-4xl text-white hover:text-[var(--primary)] transition drop-shadow-lg"></i></button>
+                    </div>
                 </div>`;
         }
 
@@ -401,10 +428,14 @@
                 <div onclick="playPhim('${m.slug}')" class="${widthClass} movie-card group cursor-pointer relative">
                     <div class="aspect-[2/3] rounded overflow-hidden bg-[#222] relative shadow-lg">
                         <img src="${getImgUrl(m.thumb_url)}" class="w-full h-full object-cover" onerror="handleImgError(this)" loading="lazy">
-                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center play-icon backdrop-blur-sm"><i class="fas fa-play-circle text-5xl text-[#e50914]"></i></div>
-                        <div class="absolute top-2 right-2 bg-[#e50914] text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-md">${m.year}</div>
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center play-icon backdrop-blur-sm"><i class="fas fa-play-circle text-6xl text-[#e50914] scale-90 group-hover:scale-100 transition"></i></div>
+                        <div class="absolute top-2 right-2 bg-[#e50914] text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-md">${m.year || 'New'}</div>
+                        <div class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black to-transparent opacity-80"></div>
                     </div>
-                    <div class="mt-2 px-1"><h3 class="text-sm font-bold text-white truncate group-hover:text-[#e50914] transition">${m.name}</h3></div>
+                    <div class="mt-2 px-1 relative z-10">
+                        <h3 class="text-sm font-bold text-white truncate group-hover:text-[#e50914] transition">${m.name}</h3>
+                        <p class="text-xs text-[#757575] truncate mt-0.5">${m.origin_name}</p>
+                    </div>
                 </div>`;
         }
 
@@ -431,8 +462,6 @@
         function toggleSearchOverlay() { document.getElementById('searchOverlay').classList.toggle('hidden'); document.getElementById('searchOverlay').classList.toggle('flex'); }
         function toggleAccordion(id) { document.getElementById(id).classList.toggle('hidden'); document.getElementById(id).classList.toggle('grid'); }
         function mobileNav(action) { toggleMobileMenu(); setTimeout(() => eval(action), 300); }
-        function mobileSearch() { const kw = document.getElementById('mobileSearchInput').value; if(kw) { toggleSearchOverlay(); searchMovies(kw); } }
-        async function searchMoviesMobile(kw) { if(kw) showCategory(`tim-kiem?keyword=${encodeURIComponent(kw)}`, `Tìm kiếm: ${kw}`); }
 
         init();
     </script>
