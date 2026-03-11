@@ -11,17 +11,17 @@
         :root { --primary: #e50914; --bg: #141414; --text-gray: #b3b3b3; }
         body { background-color: var(--bg); color: #fff; font-family: 'Montserrat', sans-serif; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         
-        /* Ẩn thanh cuộn */
+        /* Scrollbar & Snap */
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
         .snap-x { scroll-snap-type: x mandatory; }
         .snap-center { scroll-snap-align: center; }
 
-        /* Navigation Style */
+        /* Navigation */
         .nav-link { color: #e5e5e5; font-weight: 500; font-size: 14px; transition: color 0.3s; cursor: pointer; }
         .nav-link:hover, .nav-link.active { color: #fff; font-weight: 700; }
         
-        /* Dropdown Menu */
+        /* Dropdown */
         .dropdown:hover .dropdown-menu { display: grid; opacity: 1; transform: translateY(0); pointer-events: auto; }
         .dropdown-menu {
             display: none; opacity: 0; transform: translateY(10px); transition: all 0.3s;
@@ -29,10 +29,10 @@
             background: rgba(0, 0, 0, 0.95); border-top: 2px solid var(--primary);
             padding: 20px; grid-template-columns: repeat(3, 1fr); gap: 15px; min-width: 400px; z-index: 100;
         }
-        .dropdown-item { color: #b3b3b3; font-size: 13px; transition: 0.2s; display: block; }
+        .dropdown-item { color: #b3b3b3; font-size: 13px; transition: 0.2s; display: block; cursor: pointer; }
         .dropdown-item:hover { color: var(--primary); }
 
-        /* Movie Card Style */
+        /* Movie Card */
         .movie-card { transition: transform 0.3s, z-index 0.3s; }
         @media (hover: hover) { 
             .movie-card:hover { transform: scale(1.05); z-index: 10; } 
@@ -40,20 +40,20 @@
         }
         .text-shadow { text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
         
-        /* Focus cho TV Remote */
-        :focus { outline: 3px solid var(--primary); transform: scale(1.05); z-index: 50; border-radius: 4px; }
+        /* TV Focus */
+        :focus { outline: 3px solid var(--primary) !important; transform: scale(1.05) !important; z-index: 50 !important; border-radius: 4px; box-shadow: 0 0 20px rgba(229,9,20,0.5); }
         
-        /* Pagination Buttons */
+        /* Pagination */
         .page-btn {
             width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-            background: rgba(255,255,255,0.1); border-radius: 4px; font-weight: 600; transition: 0.2s;
+            background: rgba(255,255,255,0.1); border-radius: 4px; font-weight: 600; transition: 0.2s; cursor: pointer;
         }
         .page-btn:hover, .page-btn.active { background: var(--primary); color: #fff; }
     </style>
 </head>
 <body class="bg-[#141414] min-h-screen flex flex-col">
 
-    <header class="fixed w-full z-50 bg-gradient-to-b from-black/90 to-transparent transition-all duration-300 h-16 md:h-20" id="navbar">
+    <header class="fixed w-full z-50 bg-gradient-to-b from-black/95 to-transparent transition-all duration-300 h-16 md:h-20" id="navbar">
         <div class="container mx-auto px-4 h-full flex items-center justify-between">
             <div class="flex items-center gap-8">
                 <img src="image_0.png" alt="RyanPhim Logo" class="h-10 md:h-12 w-auto cursor-pointer hover:opacity-90 transition" onclick="showHome()">
@@ -81,12 +81,9 @@
                            class="bg-transparent border-none outline-none text-sm text-white w-44 placeholder-gray-400"
                            onkeydown="if(event.key === 'Enter') searchMovies()">
                 </div>
-
                 <i class="fas fa-search text-white text-xl md:hidden cursor-pointer hover:text-[var(--primary)]" onclick="toggleSearchOverlay()"></i>
                 <i class="fas fa-history text-yellow-500 text-xl md:hidden cursor-pointer" onclick="showHistory()"></i>
-                
                 <div class="w-8 h-8 rounded bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center font-bold text-white cursor-pointer shadow-lg">R</div>
-                
                 <button class="lg:hidden text-white text-xl ml-2" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
             </div>
         </div>
@@ -98,10 +95,10 @@
             <button onclick="toggleMobileMenu()" class="text-white text-2xl"><i class="fas fa-times"></i></button>
         </div>
         <div class="space-y-5 text-lg font-medium text-white">
-            <a onclick="mobileNav('showHome')" class="block hover:text-[var(--primary)]">Trang chủ</a>
-            <a onclick="mobileNav('showHistory()')" class="block text-yellow-500 font-bold"><i class="fas fa-history mr-2"></i> Lịch Sử Xem</a>
-            <a onclick="mobileNav(`showCategory('danh-sach/phim-bo', 'Phim Bộ')`)" class="block hover:text-[var(--primary)]">Phim Bộ</a>
-            <a onclick="mobileNav(`showCategory('danh-sach/phim-le', 'Phim Lẻ')`)" class="block hover:text-[var(--primary)]">Phim Lẻ</a>
+            <a onclick="mobileNav('showHome')" class="block hover:text-[var(--primary)] cursor-pointer">Trang chủ</a>
+            <a onclick="mobileNav('showHistory()')" class="block text-yellow-500 font-bold cursor-pointer"><i class="fas fa-history mr-2"></i> Lịch Sử</a>
+            <a onclick="mobileNav(`showCategory('danh-sach/phim-bo', 'Phim Bộ')`)" class="block hover:text-[var(--primary)] cursor-pointer">Phim Bộ</a>
+            <a onclick="mobileNav(`showCategory('danh-sach/phim-le', 'Phim Lẻ')`)" class="block hover:text-[var(--primary)] cursor-pointer">Phim Lẻ</a>
             
             <div onclick="toggleAccordion('mobGenre')" class="flex justify-between items-center cursor-pointer hover:text-[var(--primary)]">
                 <span>Thể Loại</span> <i class="fas fa-chevron-down text-sm transition-transform" id="arrow_mobGenre"></i>
@@ -155,16 +152,44 @@
                 </div>
             </section>
 
-            <div id="homeSections" class="container mx-auto px-4 -mt-20 relative z-30 space-y-12 pb-20"></div>
+            <section class="container mx-auto px-4 relative z-40 mb-10 -mt-16 md:-mt-8">
+                <div class="bg-black/80 backdrop-blur-md border border-white/10 rounded-lg p-4 shadow-2xl flex flex-col md:flex-row gap-3 items-center justify-between">
+                    <div class="flex items-center gap-3 w-full md:w-auto mb-2 md:mb-0 pl-2">
+                        <i class="fas fa-filter text-[#e50914] text-xl"></i>
+                        <span class="text-white font-bold uppercase tracking-wider text-sm whitespace-nowrap">Lọc Phim</span>
+                    </div>
+                    <div class="grid grid-cols-2 md:flex gap-3 w-full">
+                        <select id="filterType" class="bg-[#222] text-gray-300 border border-white/10 rounded px-3 py-2.5 w-full text-sm outline-none focus:border-[#e50914] cursor-pointer">
+                            <option value="">- Loại phim -</option>
+                            <option value="danh-sach/phim-le">Phim Lẻ</option>
+                            <option value="danh-sach/phim-bo">Phim Bộ</option>
+                            <option value="danh-sach/hoat-hinh">Hoạt Hình</option>
+                            <option value="danh-sach/tv-shows">TV Shows</option>
+                        </select>
+                        <select id="filterCountry" class="bg-[#222] text-gray-300 border border-white/10 rounded px-3 py-2.5 w-full text-sm outline-none focus:border-[#e50914] cursor-pointer">
+                            <option value="">- Quốc gia -</option>
+                            </select>
+                        <select id="filterGenre" class="bg-[#222] text-gray-300 border border-white/10 rounded px-3 py-2.5 w-full text-sm outline-none focus:border-[#e50914] col-span-2 md:col-span-1 cursor-pointer">
+                            <option value="">- Thể loại -</option>
+                            </select>
+                        <button onclick="applyFilter()" class="bg-[#e50914] text-white font-bold px-8 py-2.5 rounded hover:bg-red-700 transition w-full md:w-auto col-span-2 md:col-span-1 text-sm shadow-lg tracking-widest uppercase">Lọc</button>
+                    </div>
+                </div>
+            </section>
+
+            <div id="homeSections" class="container mx-auto px-4 relative z-30 space-y-12 pb-20"></div>
         </div>
 
         <div id="categoryPage" class="hidden pt-24 md:pt-28 container mx-auto px-4 pb-20">
             <div class="flex items-center justify-between mb-8 border-b border-white/10 pb-4">
-                <h2 id="catTitle" class="text-2xl md:text-3xl font-black text-white uppercase tracking-wide border-l-4 border-[var(--primary)] pl-4">Danh Mục</h2>
+                <h2 id="catTitle" class="text-xl md:text-3xl font-black text-white uppercase tracking-wide border-l-4 border-[var(--primary)] pl-4">Danh Mục</h2>
                 <button onclick="showHome()" class="text-sm text-gray-400 hover:text-white bg-white/10 px-4 py-2 rounded font-bold flex items-center gap-2 transition"><i class="fas fa-arrow-left"></i> Quay lại</button>
             </div>
+            
             <div id="catGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-8 min-h-[500px]"></div>
+            
             <div id="pagination" class="flex justify-center items-center gap-2 mt-12 flex-wrap"></div>
+            
             <div id="loadingSpinner" class="hidden py-20 text-center"><div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--primary)] border-t-transparent"></div></div>
         </div>
     </main>
@@ -205,8 +230,6 @@
 
     <script>
         const API = 'https://ophim1.com/v1/api';
-        
-        // DANH SÁCH SERVER ẢNH (Ưu tiên server mới nhất của OPhim)
         const IMG_DOMAINS = [
             'https://img.ophim.live/uploads/movies/', 
             'https://phimimg.com/upload/poster/', 
@@ -219,73 +242,93 @@
             loadBanner();
             loadDynamicMenus();
             
-            // Tải dữ liệu các dải phim trang chủ
             loadHomeRow('danh-sach/phim-moi-cap-nhat', 'Phim Mới Cập Nhật');
+            loadHomeRow('the-loai/phim-chieu-rap', 'Chiếu Rạp Hot');
             loadHomeRow('danh-sach/hoat-hinh', 'Hoạt Hình Chọn Lọc');
             loadHomeRow('danh-sach/phim-bo', 'Phim Bộ Độc Quyền');
-            loadHomeRow('danh-sach/tv-shows', 'TV Shows Giải Trí');
             loadHomeRow('the-loai/hanh-dong', 'Hành Động Bom Tấn');
             
-            // Hỗ trợ Remote TV (Auto Focus & Bấm OK)
+            // TV Remote Support
             setInterval(() => {
-                document.querySelectorAll('a, button, .movie-card, input').forEach(el => {
+                document.querySelectorAll('a, button, .movie-card, input, select').forEach(el => {
                     if(!el.getAttribute('tabindex')) {
                         el.setAttribute('tabindex', '0');
                         el.addEventListener('keydown', (e) => { 
-                            if(e.key==='Enter') { 
-                                if(el.tagName !== 'INPUT') { e.preventDefault(); el.click(); }
-                            } 
+                            if(e.key==='Enter' && el.tagName !== 'INPUT') { e.preventDefault(); el.click(); } 
                         });
                     }
                 });
             }, 1000);
         }
 
-        // --- FIX: TÌM KIẾM ---
+        // --- FILTER PHIM ---
+        function applyFilter() {
+            const typeObj = document.getElementById('filterType');
+            const countryObj = document.getElementById('filterCountry');
+            const genreObj = document.getElementById('filterGenre');
+            
+            let endpoint = '';
+            let titleParts = [];
+
+            if (typeObj.value) titleParts.push(typeObj.options[typeObj.selectedIndex].text);
+            if (countryObj.value) titleParts.push(countryObj.options[countryObj.selectedIndex].text);
+            if (genreObj.value) titleParts.push(genreObj.options[genreObj.selectedIndex].text);
+
+            if (titleParts.length === 0) return alert("Vui lòng chọn ít nhất 1 điều kiện lọc!");
+
+            if (genreObj.value) endpoint = genreObj.value;
+            else if (countryObj.value) endpoint = countryObj.value;
+            else endpoint = typeObj.value;
+
+            showCategory(endpoint, `LỌC: ${titleParts.join(' - ')}`);
+        }
+
+        // --- TÌM KIẾM (ĐÃ FIX LỖI KHOẢNG TRẮNG) ---
         async function searchMovies() {
             const input = document.getElementById('searchInput');
             const rawKw = input.value.trim();
             if (rawKw) {
-                // Encode URL để xử lý tiếng Việt có dấu và dấu cách
-                const encodedKw = encodeURIComponent(rawKw); 
-                showCategory(`tim-kiem?keyword=${encodedKw}`, `KẾT QUẢ TÌM KIẾM: ${rawKw.toUpperCase()}`);
+                showCategory(`tim-kiem?keyword=${encodeURIComponent(rawKw)}`, `KẾT QUẢ TÌM KIẾM: ${rawKw.toUpperCase()}`);
                 input.blur(); 
-            } else {
-                alert("Vui lòng nhập tên phim!");
-            }
+            } else alert("Vui lòng nhập tên phim!");
         }
 
         function mobileSearch() {
             const input = document.getElementById('mobileSearchInput');
             const rawKw = input.value.trim();
             if (rawKw) {
-                const encodedKw = encodeURIComponent(rawKw); 
                 toggleSearchOverlay(); 
-                showCategory(`tim-kiem?keyword=${encodedKw}`, `KẾT QUẢ TÌM KIẾM: ${rawKw.toUpperCase()}`);
+                showCategory(`tim-kiem?keyword=${encodeURIComponent(rawKw)}`, `KẾT QUẢ TÌM KIẾM: ${rawKw.toUpperCase()}`);
                 input.blur();
             }
         }
         
-        // --- FIX: LOGIC LOAD TRANG & PHÂN TRANG (Xử lý dấu ? và &) ---
+        // --- LOAD DANH MỤC & PHÂN TRANG (ĐÃ FIX LỖI LẶP NÚT & LẬT TRANG) ---
         async function loadCategoryPage() {
             const grid = document.getElementById('catGrid');
             const spinner = document.getElementById('loadingSpinner');
-            grid.innerHTML = ''; spinner.classList.remove('hidden');
+            const pag = document.getElementById('pagination');
+            
+            grid.innerHTML = ''; 
+            pag.innerHTML = ''; // Làm sạch nút phân trang cũ
+            spinner.classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            // LOGIC QUAN TRỌNG: Kiểm tra xem URL đã có dấu ? chưa
-            // Ví dụ: tim-kiem?keyword=abc (đã có ?) -> nối thêm &page=1
-            // Ví dụ: danh-sach/phim-bo (chưa có ?) -> nối thêm ?page=1
             const separator = currentEndpoint.includes('?') ? '&' : '?';
 
+            // Thuật toán: 1 Trang giao diện = 2 Trang API gộp lại (40 phim)
+            const apiPage1 = currentPage * 2 - 1;
+            const apiPage2 = currentPage * 2;
+
             try {
-                // Fetch 2 trang liên tiếp để grid nhìn đầy đặn hơn
                 const [res1, res2] = await Promise.all([
-                    fetch(`${API}/${currentEndpoint}${separator}page=${currentPage}`).then(r=>r.json()).catch(()=>({})),
-                    fetch(`${API}/${currentEndpoint}${separator}page=${currentPage+1}`).then(r=>r.json()).catch(()=>({}))
+                    fetch(`${API}/${currentEndpoint}${separator}page=${apiPage1}`).then(r=>r.json()).catch(()=>({})),
+                    fetch(`${API}/${currentEndpoint}${separator}page=${apiPage2}`).then(r=>r.json()).catch(()=>({}))
                 ]);
                 
-                const movies = [...(res1.data?.items||[]), ...(res2.data?.items||[])].slice(0, 40);
+                const items1 = res1.data?.items || [];
+                const items2 = res2.data?.items || [];
+                const movies = [...items1, ...items2].slice(0, 40);
                 
                 spinner.classList.add('hidden');
                 
@@ -296,11 +339,13 @@
                 
                 grid.innerHTML = movies.map(m => createCard(m, true)).join('');
                 
-                // Pagination Logic
-                const pag = document.getElementById('pagination');
-                if(currentPage > 1) pag.innerHTML += `<button onclick="changePage(${currentPage-2})" class="page-btn"><i class="fas fa-chevron-left"></i></button>`;
-                pag.innerHTML += `<button class="page-btn active">${Math.ceil(currentPage/2)}</button>`;
-                pag.innerHTML += `<button onclick="changePage(${currentPage+2})" class="page-btn"><i class="fas fa-chevron-right"></i></button>`;
+                // Tính toán số trang (Tổng UI Pages)
+                const totalItems = res1.data?.params?.pagination?.totalItems || 1000;
+                const itemsPerPage = res1.data?.params?.pagination?.totalItemsPerPage || 24;
+                const totalApiPages = Math.ceil(totalItems / itemsPerPage);
+                const totalUiPages = Math.ceil(totalApiPages / 2);
+                
+                renderPagination(totalUiPages);
                 
             } catch { 
                 spinner.classList.add('hidden'); 
@@ -308,14 +353,51 @@
             }
         }
 
+        // HÀM VẼ THANH PHÂN TRANG (PAGINATION XỊN)
+        function renderPagination(totalPages) {
+            const pag = document.getElementById('pagination');
+            if (totalPages <= 1) return;
+
+            let html = '';
+            const maxDisplay = 5; 
+
+            if (currentPage > 1) {
+                html += `<button onclick="changePage(${currentPage - 1})" class="page-btn"><i class="fas fa-chevron-left"></i></button>`;
+            }
+
+            let start = Math.max(1, currentPage - Math.floor(maxDisplay / 2));
+            let end = Math.min(totalPages, start + maxDisplay - 1);
+            if (end - start < maxDisplay - 1) start = Math.max(1, end - maxDisplay + 1);
+
+            if (start > 1) {
+                html += `<button onclick="changePage(1)" class="page-btn">1</button>`;
+                if (start > 2) html += `<span class="text-gray-500 px-2 flex items-end pb-2">...</span>`;
+            }
+
+            for (let i = start; i <= end; i++) {
+                const activeClass = i === currentPage ? 'active bg-[var(--primary)] text-white border-[var(--primary)]' : '';
+                html += `<button onclick="changePage(${i})" class="page-btn ${activeClass}">${i}</button>`;
+            }
+
+            if (end < totalPages) {
+                if (end < totalPages - 1) html += `<span class="text-gray-500 px-2 flex items-end pb-2">...</span>`;
+                html += `<button onclick="changePage(${totalPages})" class="page-btn">${totalPages}</button>`;
+            }
+
+            if (currentPage < totalPages) {
+                html += `<button onclick="changePage(${currentPage + 1})" class="page-btn"><i class="fas fa-chevron-right"></i></button>`;
+            }
+
+            pag.innerHTML = html;
+        }
+
+        function changePage(p) { currentPage = p; loadCategoryPage(); }
+
         // --- LỊCH SỬ XEM (LOCALSTORAGE) ---
         function saveHistory(movie) {
             let history = JSON.parse(localStorage.getItem('ryanphim_history')) || [];
             history = history.filter(m => m.slug !== movie.slug);
-            history.unshift({
-                slug: movie.slug, name: movie.name, thumb_url: movie.thumb_url,
-                year: movie.year, origin_name: movie.origin_name
-            });
+            history.unshift({ slug: movie.slug, name: movie.name, thumb_url: movie.thumb_url, year: movie.year, origin_name: movie.origin_name, episode_current: movie.episode_current, quality: movie.quality });
             if(history.length > 50) history.pop();
             localStorage.setItem('ryanphim_history', JSON.stringify(history));
         }
@@ -335,14 +417,11 @@
                 return;
             }
             grid.innerHTML = history.map(m => createCard(m, true)).join('');
-            document.getElementById('pagination').innerHTML = `<button onclick="clearHistory()" class="bg-red-600 text-white px-6 py-2 rounded font-bold hover:bg-red-700 transition">XÓA LỊCH SỬ</button>`;
+            document.getElementById('pagination').innerHTML = `<button onclick="clearHistory()" class="bg-red-600 text-white px-6 py-2 rounded font-bold hover:bg-red-700 transition shadow-lg tracking-widest">XÓA LỊCH SỬ</button>`;
         }
 
         function clearHistory() {
-            if(confirm('Bạn có chắc muốn xóa toàn bộ lịch sử xem phim?')) {
-                localStorage.removeItem('ryanphim_history');
-                showHistory();
-            }
+            if(confirm('Xóa toàn bộ lịch sử xem phim?')) { localStorage.removeItem('ryanphim_history'); showHistory(); }
         }
 
         // --- PLAY VIDEO ---
@@ -350,7 +429,7 @@
             try {
                 const res = await fetch(`${API}/phim/${slug}`).then(r=>r.json());
                 const item = res.data.item;
-                saveHistory(item); // Lưu lịch sử khi bấm xem
+                saveHistory(item); // Lưu lịch sử
 
                 document.getElementById('playerArea').classList.remove('hidden');
                 document.getElementById('playTitle').innerText = item.name;
@@ -362,10 +441,10 @@
                 
                 document.getElementById('mainIframe').src = item.episodes[0].server_data[0].link_embed;
                 document.getElementById('playerArea').scrollIntoView({behavior:'smooth', block:'start'});
-            } catch(e) { alert("Phim này hiện đang bảo trì, vui lòng chọn phim khác!"); }
+            } catch(e) { alert("Lỗi kết nối. Phim này có thể đang bảo trì!"); }
         }
 
-        // --- CÁC HÀM HỖ TRỢ XỬ LÝ ẢNH ---
+        // --- CÁC HÀM XỬ LÝ ẢNH & RENDER GIAO DIỆN ---
         function getImgUrl(u) { 
             if(!u) return 'https://via.placeholder.com/300x450?text=No+Image';
             return u.includes('http') ? u : `${IMG_DOMAINS[0]}${u}`; 
@@ -381,10 +460,14 @@
             try {
                 const [resGenre, resCountry] = await Promise.all([ fetch(`${API}/the-loai`).then(r=>r.json()), fetch(`${API}/quoc-gia`).then(r=>r.json()) ]);
                 const genres = resGenre.data.items; const countries = resCountry.data.items;
-                document.getElementById('desktopGenre').innerHTML = genres.map(i => `<a onclick="showCategory('the-loai/${i.slug}', '${i.name}')" class="dropdown-item cursor-pointer">${i.name}</a>`).join('');
-                document.getElementById('desktopCountry').innerHTML = countries.map(i => `<a onclick="showCategory('quoc-gia/${i.slug}', '${i.name}')" class="dropdown-item cursor-pointer">${i.name}</a>`).join('');
+                
+                document.getElementById('desktopGenre').innerHTML = genres.map(i => `<a onclick="showCategory('the-loai/${i.slug}', '${i.name}')" class="dropdown-item">${i.name}</a>`).join('');
+                document.getElementById('desktopCountry').innerHTML = countries.map(i => `<a onclick="showCategory('quoc-gia/${i.slug}', '${i.name}')" class="dropdown-item">${i.name}</a>`).join('');
                 document.getElementById('mobGenre').innerHTML = genres.map(i => `<a onclick="mobileNav(\`showCategory('the-loai/${i.slug}', '${i.name}')\`)" class="block hover:text-[var(--primary)] transition">${i.name}</a>`).join('');
                 document.getElementById('mobCountry').innerHTML = countries.map(i => `<a onclick="mobileNav(\`showCategory('quoc-gia/${i.slug}', '${i.name}')\`)" class="block hover:text-[var(--primary)] transition">${i.name}</a>`).join('');
+                
+                document.getElementById('filterGenre').innerHTML += genres.map(i => `<option value="the-loai/${i.slug}">${i.name}</option>`).join('');
+                document.getElementById('filterCountry').innerHTML += countries.map(i => `<option value="quoc-gia/${i.slug}">${i.name}</option>`).join('');
             } catch {}
         }
 
@@ -422,14 +505,26 @@
                 </div>`;
         }
 
+        // HÀM TẠO THẺ PHIM (CÓ NHÃN TRẠNG THÁI THÔNG MINH)
         function createCard(m, isGrid=false) {
             const widthClass = isGrid ? 'w-full' : 'w-[140px] md:w-[220px] flex-shrink-0 snap-center';
+            
+            // Xử lý nhãn trạng thái (Full, Trailer, Tập...)
+            let epLabel = m.episode_current || m.quality || 'HD';
+            let epBgColor = 'bg-[#e50914]'; 
+            if (epLabel.toLowerCase().includes('trailer')) epBgColor = 'bg-gray-600'; 
+            else if (epLabel.toLowerCase().includes('full') || epLabel.toLowerCase().includes('hoàn')) epBgColor = 'bg-green-600'; 
+            else if (epLabel.toLowerCase().includes('tập')) epBgColor = 'bg-blue-600'; 
+
             return `
                 <div onclick="playPhim('${m.slug}')" class="${widthClass} movie-card group cursor-pointer relative">
-                    <div class="aspect-[2/3] rounded overflow-hidden bg-[#222] relative shadow-lg">
+                    <div class="aspect-[2/3] rounded overflow-hidden bg-[#222] relative shadow-lg border border-white/5">
                         <img src="${getImgUrl(m.thumb_url)}" class="w-full h-full object-cover" onerror="handleImgError(this)" loading="lazy">
                         <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center play-icon backdrop-blur-sm"><i class="fas fa-play-circle text-6xl text-[#e50914] scale-90 group-hover:scale-100 transition"></i></div>
-                        <div class="absolute top-2 right-2 bg-[#e50914] text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-md">${m.year || 'New'}</div>
+                        
+                        <div class="absolute top-2 left-2 ${epBgColor} text-white text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 rounded shadow-md uppercase tracking-wider">${epLabel}</div>
+                        <div class="absolute top-2 right-2 bg-black/70 backdrop-blur-md border border-white/20 text-white text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 rounded shadow-md">${m.year || 'New'}</div>
+                        
                         <div class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black to-transparent opacity-80"></div>
                     </div>
                     <div class="mt-2 px-1 relative z-10">
@@ -439,28 +534,12 @@
                 </div>`;
         }
 
-        // --- NAVIGATION ---
-        function showHome() {
-            document.getElementById('homePage').classList.remove('hidden');
-            document.getElementById('categoryPage').classList.add('hidden');
-            document.getElementById('playerArea').classList.add('hidden');
-            window.scrollTo(0,0);
-        }
-
-        async function showCategory(endpoint, title) {
-            currentEndpoint = endpoint; currentPage = 1;
-            document.getElementById('homePage').classList.add('hidden');
-            document.getElementById('playerArea').classList.add('hidden');
-            document.getElementById('categoryPage').classList.remove('hidden');
-            document.getElementById('catTitle').innerText = title;
-            document.getElementById('pagination').innerHTML = '';
-            loadCategoryPage();
-        }
-
-        function changePage(p) { currentPage = Math.max(1, p); loadCategoryPage(); }
+        // --- UI NAVIGATION ---
+        function showHome() { document.getElementById('homePage').classList.remove('hidden'); document.getElementById('categoryPage').classList.add('hidden'); document.getElementById('playerArea').classList.add('hidden'); window.scrollTo(0,0); }
+        function showCategory(endpoint, title) { currentEndpoint = endpoint; currentPage = 1; document.getElementById('homePage').classList.add('hidden'); document.getElementById('playerArea').classList.add('hidden'); document.getElementById('categoryPage').classList.remove('hidden'); document.getElementById('catTitle').innerText = title; document.getElementById('pagination').innerHTML = ''; loadCategoryPage(); }
         function toggleMobileMenu() { document.getElementById('mobileMenu').classList.toggle('translate-x-full'); document.getElementById('menuBackdrop').classList.toggle('hidden'); }
         function toggleSearchOverlay() { document.getElementById('searchOverlay').classList.toggle('hidden'); document.getElementById('searchOverlay').classList.toggle('flex'); }
-        function toggleAccordion(id) { document.getElementById(id).classList.toggle('hidden'); document.getElementById(id).classList.toggle('grid'); }
+        function toggleAccordion(id) { document.getElementById(id).classList.toggle('hidden'); document.getElementById(id).classList.toggle('grid'); document.getElementById(`arrow_${id}`).style.transform = document.getElementById(id).classList.contains('grid') ? 'rotate(180deg)' : 'rotate(0deg)'; }
         function mobileNav(action) { toggleMobileMenu(); setTimeout(() => eval(action), 300); }
 
         init();
