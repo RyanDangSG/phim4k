@@ -608,5 +608,19 @@
             document.getElementById('catGrid').innerHTML = (res?.data?.items || []).map(m=>createCard(m, true)).join('');
         }
 
-        function openMobileMenu() { document.getElementById('mobileMenu').classList.remove('translate-x-full'); document.getElementById('menuBackdrop').classList.remove('hidden'); }
-        function closeMobileMenu() { document.getElementById('mobileMenu').classList.add('translate-x-full
+       function openMobileMenu() { 
+            document.getElementById('mobileMenu').classList.remove('translate-x-full'); 
+            const backdrop = document.getElementById('menuBackdrop');
+            if (backdrop) backdrop.classList.remove('hidden');
+        }
+        
+        function closeMobileMenu() { 
+            document.getElementById('mobileMenu').classList.add('translate-x-full');
+            const backdrop = document.getElementById('menuBackdrop');
+            if (backdrop) backdrop.classList.add('hidden');
+        }
+
+        // BẮT BUỘC: Gọi hàm init() khi cấu trúc HTML đã tải xong để render giao diện và phim
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+        });
