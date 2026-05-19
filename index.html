@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RyanPhim - Ultimate Edition</title>
+    <title>RyanPhim - The Masterpiece</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -22,53 +22,55 @@
         .snap-x { scroll-snap-type: x mandatory; }
         .snap-center { scroll-snap-align: center; }
 
-        /* UI Nâng cấp */
+        /* [FIX 1 & 6] Animation & Nav-link CSS */
+        .nav-link { color: #e5e5e5; font-weight: 500; font-size: 14px; transition: color 0.3s; cursor: pointer; position: relative; padding-bottom: 5px; }
+        .nav-link:hover, .nav-link.active { color: #fff; font-weight: 700; }
+        .nav-link.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--primary); border-radius: 2px; }
+        
+        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Premium UI */
         .movie-card { transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); z-index: 1; }
         @media (hover: hover) { 
-            .movie-card:hover { transform: scale(1.08) translateY(-5px); z-index: 20; box-shadow: 0 10px 20px rgba(229,9,20,0.4); border-radius: 8px; } 
+            .movie-card:hover { transform: scale(1.08) translateY(-5px); z-index: 20; box-shadow: 0 15px 30px rgba(229,9,20,0.3); border-radius: 8px; } 
             .movie-card:hover .play-icon { opacity: 1; transform: scale(1); }
         }
         .play-icon { opacity: 0; transform: scale(0.8); transition: 0.3s; }
         
-        /* Skeleton Loading Shimmer */
-        .skeleton { background: linear-gradient(90deg, #222 25%, #333 50%, #222 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+        /* Skeleton Shimmer */
+        .skeleton { background: linear-gradient(90deg, #222 25%, #3a3a3a 50%, #222 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
-        /* Banner & Dropdown */
+        /* Dropdown & Overlays */
         .banner-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease-in-out; }
         .banner-slide.active { opacity: 1; z-index: 10; }
-        
         .dropdown:hover .dropdown-menu { display: grid; opacity: 1; transform: translateY(0); pointer-events: auto; }
-        .dropdown-menu { display: none; opacity: 0; transform: translateY(10px); transition: all 0.3s; position: absolute; top: 100%; left: 0; background: rgba(0,0,0,0.95); border-top: 2px solid var(--primary); padding: 20px; grid-template-columns: repeat(3, 1fr); gap: 15px; min-width: 400px; z-index: 100; }
+        .dropdown-menu { display: none; opacity: 0; transform: translateY(10px); transition: all 0.3s; position: absolute; top: 100%; left: 0; background: rgba(0,0,0,0.95); border-top: 2px solid var(--primary); padding: 20px; grid-template-columns: repeat(3, 1fr); gap: 15px; min-width: 400px; z-index: 100; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
         .dropdown-item:hover { color: var(--primary); }
-
-        /* Nút Skip & Next Countdown */
         .skip-intro-btn { position: absolute; bottom: 80px; right: 30px; background: rgba(0,0,0,0.7); border: 1px solid #fff; padding: 8px 16px; border-radius: 4px; z-index: 50; cursor: pointer; transition: 0.2s; font-weight: bold; }
         .skip-intro-btn:hover { background: #fff; color: #000; }
-        
-        .next-ep-overlay { position: absolute; bottom: 80px; right: 30px; background: rgba(0,0,0,0.8); padding: 15px 20px; border-radius: 8px; z-index: 50; display: flex; flex-direction: column; align-items: center; border: 1px solid var(--primary); }
-        .next-btn { background: var(--primary); color: white; padding: 8px 20px; border-radius: 4px; font-weight: bold; margin-top: 10px; cursor: pointer; }
-
-        /* Live Search */
         #liveSearchResults { max-height: 400px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
     </style>
 </head>
 <body class="bg-[#141414] min-h-screen flex flex-col">
 
-    <header class="fixed w-full z-50 bg-gradient-to-b from-black/95 to-transparent transition-all duration-300 h-16 md:h-20" id="navbar">
+    <div id="toastContainer" class="fixed top-20 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
+
+    <header class="fixed w-full z-50 bg-black/70 backdrop-blur-xl border-b border-white/5 transition-all duration-300 h-16 md:h-20" id="navbar">
         <div class="container mx-auto px-4 h-full flex items-center justify-between">
             <div class="flex items-center gap-8">
-                <img src="image_0.png" alt="RyanPhim Logo" class="h-10 md:h-12 w-auto cursor-pointer hover:opacity-90 transition" onclick="showHome()">
-                
-                <nav class="hidden lg:flex items-center gap-6">
-                    <a onclick="showHome()" class="text-[#e5e5e5] hover:text-white font-medium cursor-pointer">Trang chủ</a>
-                    <a onclick="showHistory()" class="text-yellow-500 font-bold cursor-pointer"><i class="fas fa-history mr-1"></i> Lịch Sử</a>
+                <img src="image_0.png" alt="RyanPhim" class="h-10 md:h-12 w-auto cursor-pointer hover:opacity-90 transition" onclick="showHome()">
+                <nav class="hidden lg:flex items-center gap-6 mt-1">
+                    <a onclick="showHome()" class="nav-link active" id="nav_home">Trang chủ</a>
+                    <a onclick="showHistory()" class="nav-link" id="nav_history"><i class="fas fa-history mr-1"></i> Lịch Sử</a>
+                    <a onclick="showFavorites()" class="nav-link text-red-400 hover:text-red-500 font-bold"><i class="fas fa-heart mr-1"></i> Yêu Thích</a>
                     <div class="dropdown relative group py-4">
-                        <span class="text-[#e5e5e5] hover:text-white font-medium cursor-pointer flex items-center gap-1">Thể loại <i class="fas fa-chevron-down text-[10px]"></i></span>
+                        <span class="nav-link flex items-center gap-1">Thể loại <i class="fas fa-chevron-down text-[10px]"></i></span>
                         <div id="desktopGenre" class="dropdown-menu"></div>
                     </div>
-                    <a onclick="showCategory('danh-sach/phim-bo', 'Phim Bộ')" class="text-[#e5e5e5] hover:text-white font-medium cursor-pointer">Phim Bộ</a>
-                    <a onclick="showCategory('danh-sach/phim-le', 'Phim Lẻ')" class="text-[#e5e5e5] hover:text-white font-medium cursor-pointer">Phim Lẻ</a>
+                    <a onclick="showCategory('danh-sach/phim-bo', 'Phim Bộ')" class="nav-link" id="nav_phimbo">Phim Bộ</a>
+                    <a onclick="showCategory('danh-sach/phim-le', 'Phim Lẻ')" class="nav-link" id="nav_phimle">Phim Lẻ</a>
                 </nav>
             </div>
 
@@ -76,43 +78,53 @@
                 <div class="hidden md:block relative">
                     <div class="flex items-center border border-white/30 bg-black/50 px-3 py-1.5 rounded-sm transition focus-within:border-white focus-within:bg-black/80">
                         <i class="fas fa-search text-white mr-2"></i>
-                        <input id="searchInput" type="text" placeholder="Tên phim..." class="bg-transparent border-none outline-none text-sm text-white w-56 placeholder-gray-400">
+                        <input id="searchInput" type="text" placeholder="Tìm kiếm phim..." class="bg-transparent border-none outline-none text-sm text-white w-56 placeholder-gray-400">
                     </div>
                     <div id="liveSearchResults" class="hidden absolute top-full mt-2 w-[350px] right-0 bg-[#181818] border border-white/10 rounded-lg z-50 flex-col gap-2 p-2 custom-scrollbar"></div>
                 </div>
-                
-                <i class="fas fa-search text-white text-xl md:hidden cursor-pointer" onclick="toggleSearchOverlay()"></i>
-                <button class="lg:hidden text-white text-xl ml-2" onclick="document.getElementById('mobileMenu').classList.toggle('translate-x-full');"><i class="fas fa-bars"></i></button>
+                <i class="fas fa-search text-white text-xl md:hidden cursor-pointer" onclick="openSearchOverlay()"></i>
+                <div class="w-8 h-8 rounded bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center font-bold text-white cursor-pointer shadow-lg">R</div>
+                <button class="lg:hidden text-white text-xl ml-2" onclick="openMobileMenu()"><i class="fas fa-bars"></i></button>
             </div>
         </div>
     </header>
 
     <div id="mobileMenu" class="fixed inset-y-0 right-0 w-[80%] max-w-[320px] bg-[#141414] z-[60] transform translate-x-full transition-transform duration-300 border-l border-white/10 p-6 overflow-y-auto">
         <div class="flex justify-between items-center mb-8 border-b border-white/10 pb-4">
-            <img src="image_0.png" class="h-8 w-auto"><button onclick="document.getElementById('mobileMenu').classList.add('translate-x-full');" class="text-white text-2xl"><i class="fas fa-times"></i></button>
+            <img src="image_0.png" class="h-8 w-auto"><button onclick="closeMobileMenu()" class="text-white text-2xl"><i class="fas fa-times"></i></button>
         </div>
         <div class="space-y-5 text-lg font-medium text-white">
-            <a onclick="mobileNav('showHome')" class="block hover:text-[var(--primary)]">Trang chủ</a>
-            <a onclick="mobileNav('showHistory()')" class="block text-yellow-500 font-bold"><i class="fas fa-history mr-2"></i> Lịch Sử Xem</a>
-            <a onclick="mobileNav(`showCategory('danh-sach/phim-bo', 'Phim Bộ')`)" class="block hover:text-[var(--primary)]">Phim Bộ</a>
+            <a onclick="mobileNav(showHome)" class="block hover:text-[#e50914] cursor-pointer">Trang chủ</a>
+            <a onclick="mobileNav(showHistory)" class="block hover:text-[#e50914] cursor-pointer"><i class="fas fa-history mr-2"></i> Lịch Sử</a>
+            <a onclick="mobileNav(showFavorites)" class="block text-red-500 font-bold cursor-pointer"><i class="fas fa-heart mr-2"></i> Yêu Thích</a>
+            <a onclick="mobileNav(() => showCategory('danh-sach/phim-bo', 'Phim Bộ'))" class="block hover:text-[#e50914] cursor-pointer">Phim Bộ</a>
         </div>
+    </div>
+    
+    <div id="searchOverlay" class="fixed top-0 left-0 w-full h-16 bg-[#141414] z-[70] hidden items-center px-4 border-b border-white/10">
+        <input id="mobileSearchInput" type="text" placeholder="Nhập tên phim..." class="flex-1 bg-transparent text-white border-none outline-none text-base h-full" onkeydown="if(event.key === 'Enter') mobileSearch()">
+        <button onclick="mobileSearch()" class="text-[#e50914] font-bold px-3 uppercase">Tìm</button>
+        <button onclick="closeSearchOverlay()" class="text-white px-2"><i class="fas fa-times"></i></button>
     </div>
 
     <main class="flex-grow">
         
-        <section id="playerArea" class="hidden bg-black relative z-40 mb-10 pt-16 md:pt-20">
+        <section id="playerArea" class="hidden bg-black relative z-40 mb-10 pt-16 md:pt-20 animate-fade-in">
             <div class="container mx-auto px-0 md:px-4">
                 <div class="aspect-video w-full bg-black shadow-2xl md:rounded-xl overflow-hidden border border-white/10 relative group">
-                    <video id="mainVideo" class="w-full h-full hidden" playsinline controls></video>
+                    <video id="mainVideo" class="w-full h-full hidden" playsinline controls muted></video>
                     <iframe id="backupIframe" class="w-full h-full hidden" frameborder="0" allowfullscreen></iframe>
                     
-                    <button id="skipIntroBtn" class="skip-intro-btn hidden" onclick="skipIntro()">Bỏ qua giới thiệu</button>
+                    <button id="skipIntroBtn" class="skip-intro-btn hidden" onclick="skipIntro()"><i class="fas fa-forward mr-2"></i> Bỏ qua giới thiệu</button>
                     
-                    <div id="nextEpOverlay" class="next-ep-overlay hidden">
-                        <span class="text-white text-sm">Tập tiếp theo sẽ phát sau <span id="nextCountdown" class="text-[#e50914] font-bold text-lg">8</span>s</span>
-                        <div class="flex gap-3">
-                            <button onclick="playNextEp()" class="next-btn"><i class="fas fa-play mr-1"></i> Xem ngay</button>
-                            <button onclick="cancelNextEp()" class="bg-gray-600 text-white padding-8px-20px rounded mt-2 px-4 py-2 font-bold text-sm">Hủy</button>
+                    <div id="nextEpOverlay" class="hidden absolute inset-0 bg-black/80 z-50 flex items-center justify-center backdrop-blur-sm">
+                        <div class="text-center transform scale-110">
+                            <h3 class="text-gray-300 text-xl mb-2">Tập tiếp theo</h3>
+                            <div class="text-white text-3xl font-black mb-6">Tự động phát sau <span id="nextCountdown" class="text-[#e50914] text-5xl mx-2">8</span>s</div>
+                            <div class="flex justify-center gap-4">
+                                <button onclick="playNextEp()" class="bg-[#e50914] text-white px-8 py-3 rounded text-lg font-bold hover:bg-red-700 transition shadow-lg"><i class="fas fa-play mr-2"></i> Xem ngay</button>
+                                <button onclick="cancelNextEp()" class="bg-gray-700 text-white px-8 py-3 rounded text-lg font-bold hover:bg-gray-600 transition">Hủy</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -122,9 +134,14 @@
                         <div class="flex-1">
                             <div class="flex items-center justify-between mb-3">
                                 <h2 id="playTitle" class="text-2xl md:text-4xl font-black text-white uppercase line-clamp-2"></h2>
-                                <button onclick="closePlayer()" class="bg-white/10 hover:bg-white hover:text-black text-white px-4 py-2 rounded font-bold flex items-center gap-2 border border-white/20">
-                                    <i class="fas fa-arrow-left"></i> <span class="hidden md:inline">Đóng Phim</span>
-                                </button>
+                                <div class="flex gap-2">
+                                    <button onclick="toggleFavorite()" class="bg-black/40 hover:bg-black/60 text-white px-4 py-2 rounded font-bold transition border border-white/10 flex items-center gap-2">
+                                        <i id="favIcon" class="far fa-heart text-white"></i> <span class="hidden md:inline">Yêu Thích</span>
+                                    </button>
+                                    <button onclick="closePlayer()" class="bg-white/10 hover:bg-white hover:text-black text-white px-4 py-2 rounded font-bold transition border border-white/20 flex items-center gap-2">
+                                        <i class="fas fa-arrow-left"></i> <span class="hidden md:inline">Đóng</span>
+                                    </button>
+                                </div>
                             </div>
                             <div id="serverList" class="flex gap-2 mb-4"></div>
                             <p class="text-gray-400 text-sm md:text-base mb-6 line-clamp-4 leading-relaxed" id="playDesc"></p>
@@ -153,16 +170,22 @@
             <div id="homeSections" class="container mx-auto px-4 relative z-30 space-y-12 pb-20"></div>
         </div>
 
-        <div id="categoryPage" class="hidden pt-24 container mx-auto px-4 pb-20">
-            <h2 id="catTitle" class="text-2xl font-black text-white uppercase border-l-4 border-[var(--primary)] pl-4 mb-8">Danh Mục</h2>
-            <div id="catGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-4 gap-y-8 min-h-[500px]"></div>
+        <div id="categoryPage" class="hidden pt-24 container mx-auto px-4 pb-20 animate-fade-in">
+            <div class="flex items-center justify-between mb-8 border-b border-white/10 pb-4">
+                <h2 id="catTitle" class="text-2xl md:text-3xl font-black text-white uppercase tracking-wide border-l-4 border-[var(--primary)] pl-4">Danh Mục</h2>
+                <button onclick="showHome()" class="text-sm text-gray-400 hover:text-white bg-white/10 px-4 py-2 rounded font-bold flex items-center gap-2 transition"><i class="fas fa-arrow-left"></i> Quay lại</button>
+            </div>
+            <div id="catGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-8 min-h-[500px]"></div>
             <div id="pagination" class="flex justify-center items-center gap-2 mt-12 flex-wrap"></div>
         </div>
     </main>
 
-    <footer class="bg-black py-8 text-center text-[#757575] text-sm mt-auto border-t border-white/10">
-        <img src="image_0.png" class="h-8 w-auto mx-auto mb-2 opacity-50">
-        <p>© 2026 RYANPHIM V9 Pro - Powered by Cache API & LocalStorage</p>
+    <footer class="bg-[#111] py-8 border-t border-white/10 mt-auto">
+        <div class="container mx-auto px-4 text-center">
+            <img src="image_0.png" class="h-8 w-auto mx-auto mb-4 opacity-50 grayscale hover:grayscale-0 transition">
+            <p class="text-gray-500 text-xs">© 2026 RYANPHIM. Nền tảng giải trí chất lượng cao.</p>
+            <p class="text-gray-600 text-[10px] mt-2">Dữ liệu được thu thập từ internet. Không lưu trữ tệp tin trên máy chủ.</p>
+        </div>
     </footer>
 
     <script>
@@ -171,13 +194,16 @@
         
         let currentEndpoint = '', currentPage = 1;
         let plyrPlayer = null, hlsInstance = null;
-        let playState = { slug: '', ep_idx: 0, server_idx: 0, eps_data: null };
-        let nextEpTimer = null, isNextCancelled = false;
+        let playState = { item: null, slug: '', ep_idx: 0, server_idx: 0, eps_data: null };
+        let isNextCancelled = false;
 
-        // --- 1. CORE & PERFORMANCE (CACHE API + DEBOUNCE) ---
+        // --- CORE (FIXED CACHE KEY) ---
         async function fetchCached(endpoint, ttlMins = 30) {
-            const cacheKey = `ryan_cache_${endpoint}`;
+            // Fix #4: Dùng btoa để tạo cache key an toàn
+            const safeKey = btoa(unescape(encodeURIComponent(endpoint))).replace(/=/g, '');
+            const cacheKey = `ryan_cache_${safeKey}`;
             const cached = localStorage.getItem(cacheKey);
+            
             if (cached) {
                 const parsed = JSON.parse(cached);
                 if (Date.now() - parsed.time < ttlMins * 60 * 1000) return parsed.data;
@@ -191,10 +217,7 @@
 
         function debounce(func, wait) {
             let timeout;
-            return function executedFunction(...args) {
-                const later = () => { clearTimeout(timeout); func(...args); };
-                clearTimeout(timeout); timeout = setTimeout(later, wait);
-            };
+            return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func(...args), wait); };
         }
 
         function getImg(thumb) {
@@ -202,37 +225,50 @@
             return thumb.startsWith('http') ? thumb : IMG_HOST + thumb.replace(/^\//, '');
         }
 
-        // --- 2. KHỞI TẠO DỮ LIỆU ---
+        // --- TOAST ---
+        function showToast(msg, type='success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const icon = type==='success' ? 'fa-check-circle text-green-500' : type==='error' ? 'fa-exclamation-circle text-red-500' : 'fa-info-circle text-blue-500';
+            toast.className = `bg-[#181818] border border-gray-700 text-white px-4 py-3 rounded shadow-2xl transition-all duration-300 transform translate-x-full opacity-0 flex items-center gap-3`;
+            toast.innerHTML = `<i class="fas ${icon} text-lg"></i> <span class="font-bold text-sm">${msg}</span>`;
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.classList.remove('translate-x-full', 'opacity-0'), 10);
+            setTimeout(() => { toast.classList.add('translate-x-full', 'opacity-0'); setTimeout(()=>toast.remove(), 300); }, 3000);
+        }
+
+        // --- INIT ---
         async function init() {
             loadDynamicMenus();
             loadBanners();
             renderContinueWatching();
             
-            // Render Skeleton trước khi load API
-            document.getElementById('homeSections').innerHTML = 
-                buildSkeletonRow('Phim Mới Cập Nhật') + buildSkeletonRow('Chiếu Rạp Hot') + buildSkeletonRow('Hoạt Hình');
+            document.getElementById('homeSections').innerHTML = buildSkeletonRow('Phim Mới Cập Nhật') + buildSkeletonRow('Chiếu Rạp Hot') + buildSkeletonRow('Hoạt Hình');
 
-            // Load API
             loadHomeRow('danh-sach/phim-moi-cap-nhat', 'Phim Mới Cập Nhật');
             loadHomeRow('the-loai/phim-chieu-rap', 'Chiếu Rạp Hot');
             loadHomeRow('danh-sach/hoat-hinh', 'Hoạt Hình Chọn Lọc');
-            loadHomeRow('danh-sach/phim-bo', 'Phim Bộ Độc Quyền');
 
-            // Cấu hình Live Search
-            document.getElementById('searchInput').addEventListener('input', debounce(liveSearch, 500));
+            document.getElementById('searchInput').addEventListener('input', debounce(liveSearch, 400));
             document.addEventListener('click', (e) => {
-                if(!e.target.closest('#searchInput') && !e.target.closest('#liveSearchResults')) {
-                    document.getElementById('liveSearchResults').classList.add('hidden');
-                }
+                if(!e.target.closest('#searchInput') && !e.target.closest('#liveSearchResults')) document.getElementById('liveSearchResults').classList.add('hidden');
             });
+            setupKeyboardShortcuts();
+            setActiveNav('nav_home');
         }
 
-        // --- 3. UI GENERATORS (Skeleton, Cards, Banner) ---
+        function setActiveNav(id) {
+            document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+            if(document.getElementById(id)) document.getElementById(id).classList.add('active');
+        }
+
+        // --- UI COMPONENTS ---
         function buildSkeletonRow(title) {
             let skels = '';
             for(let i=0; i<6; i++) skels += `<div class="w-[140px] md:w-[220px] aspect-[2/3] skeleton flex-shrink-0 snap-center"></div>`;
             return `
-            <div class="group relative" id="skel_${title.replace(/\s/g,'')}">
+            <div class="group relative mb-8" id="skel_${title.replace(/\s/g,'')}">
                 <h2 class="text-xl md:text-2xl font-bold text-white mb-4"><span class="w-1 h-6 bg-[#e50914] rounded-full inline-block align-middle mr-2"></span>${title}</h2>
                 <div class="flex gap-3 md:gap-4 overflow-x-hidden pb-4 px-1">${skels}</div>
             </div>`;
@@ -245,24 +281,23 @@
             if (epLabel.toLowerCase().includes('trailer')) bgBadge = 'bg-gray-600'; 
             else if (epLabel.toLowerCase().includes('full')) bgBadge = 'bg-green-600'; 
 
-            // Progress bar cho Continue Watching
             let progressBar = '';
             if (historyData && historyData.percent > 0) {
-                progressBar = `<div class="absolute bottom-0 left-0 w-full h-1 bg-gray-600"><div class="h-full bg-[#e50914]" style="width: ${historyData.percent}%"></div></div>`;
+                progressBar = `<div class="absolute bottom-0 left-0 w-full h-1 bg-gray-700"><div class="h-full bg-[#e50914] shadow-[0_0_10px_red]" style="width: ${historyData.percent}%"></div></div>`;
             }
 
             return `
-            <div onclick="playPhim('${m.slug}')" class="${width} movie-card cursor-pointer relative">
-                <div class="aspect-[2/3] rounded overflow-hidden bg-[#222] relative shadow-lg">
+            <div onclick="playPhim('${m.slug}')" class="${width} movie-card cursor-pointer relative animate-fade-in">
+                <div class="aspect-[2/3] rounded overflow-hidden bg-[#222] relative border border-white/5">
                     <img src="${getImg(m.thumb_url)}" class="w-full h-full object-cover" loading="lazy">
-                    <div class="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition flex items-center justify-center play-icon backdrop-blur-sm"><i class="fas fa-play-circle text-6xl text-[#e50914]"></i></div>
-                    <div class="absolute top-2 left-2 ${bgBadge} text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-md">${epLabel}</div>
+                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center play-icon backdrop-blur-sm"><i class="fas fa-play-circle text-6xl text-white shadow-2xl"></i></div>
+                    <div class="absolute top-2 left-2 ${bgBadge} text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-md uppercase tracking-wider">${epLabel}</div>
                     <div class="absolute top-2 right-2 bg-black/70 backdrop-blur-md text-white text-[10px] font-bold px-1.5 py-0.5 rounded border border-white/20">${m.year || 'New'}</div>
                     ${progressBar}
                 </div>
                 <div class="mt-2 px-1">
-                    <h3 class="text-sm font-bold text-white truncate">${m.name}</h3>
-                    ${historyData ? `<p class="text-[11px] text-green-500 font-bold mt-1">Đang xem: ${historyData.ep_name}</p>` : `<p class="text-[11px] text-gray-500 truncate mt-0.5">${m.origin_name}</p>`}
+                    <h3 class="text-sm font-bold text-white truncate group-hover:text-[#e50914] transition">${m.name}</h3>
+                    ${historyData ? `<p class="text-[11px] text-[#e50914] font-bold mt-1">Đang xem: ${historyData.ep_name}</p>` : `<p class="text-[11px] text-gray-500 truncate mt-0.5">${m.origin_name}</p>`}
                 </div>
             </div>`;
         }
@@ -276,23 +311,30 @@
             let cards = movies.map(m => createCard(m)).join('');
             
             const html = `
-            <div class="group relative" id="${rowId}">
+            <div class="group relative mb-8" id="${rowId}">
                 <div class="flex justify-between items-end mb-4 px-2">
-                    <h2 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2"><span class="w-1 h-6 bg-[#e50914] rounded-full"></span> ${title}</h2>
-                    <span class="text-xs text-gray-400 font-bold uppercase cursor-pointer hover:text-white" onclick="showCategory('${endpoint}', '${title}')">Xem tất cả <i class="fas fa-chevron-right ml-1"></i></span>
+                    <h2 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2 cursor-pointer hover:text-[#e50914] transition" onclick="showCategory('${endpoint}', '${title}')"><span class="w-1 h-6 bg-[#e50914] rounded-full"></span> ${title} <i class="fas fa-chevron-right text-xs opacity-50 ml-1"></i></h2>
+                    <span class="text-xs text-gray-400 font-bold uppercase cursor-pointer hover:text-white" onclick="showCategory('${endpoint}', '${title}')">Xem tất cả</span>
                 </div>
-                <div class="flex gap-3 md:gap-4 overflow-x-auto hide-scroll snap-x pb-4 px-1" id="${rowId}_row">${cards}</div>
+                <div class="relative group/slider">
+                    <button class="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-12 h-full bg-gradient-to-r from-black to-transparent opacity-0 group-hover/slider:opacity-100 transition hidden md:flex items-center justify-start pl-2" onclick="document.getElementById('${rowId}_row').scrollBy({left:-window.innerWidth*0.7,behavior:'smooth'})"><i class="fas fa-chevron-left text-4xl text-white hover:text-[var(--primary)]"></i></button>
+                    <div class="flex gap-3 md:gap-4 overflow-x-auto hide-scroll snap-x pb-4 px-1 scroll-smooth" id="${rowId}_row">${cards}</div>
+                    <button class="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-12 h-full bg-gradient-to-l from-black to-transparent opacity-0 group-hover/slider:opacity-100 transition hidden md:flex items-center justify-end pr-2" onclick="document.getElementById('${rowId}_row').scrollBy({left:window.innerWidth*0.7,behavior:'smooth'})"><i class="fas fa-chevron-right text-4xl text-white hover:text-[var(--primary)]"></i></button>
+                </div>
             </div>`;
             
-            // Xóa skeleton và đắp HTML thật
             const skel = document.getElementById(`skel_${title.replace(/\s/g,'')}`);
-            if(skel) skel.outerHTML = html;
-            else document.getElementById('homeSections').innerHTML += html;
+            if(skel) skel.outerHTML = html; else document.getElementById('homeSections').innerHTML += html;
         }
 
         async function loadBanners() {
-            const res = await fetchCached('home');
+            // Fix #2: Dùng danh-sach/phim-moi-cap-nhat thay vì home
+            const res = await fetchCached('danh-sach/phim-moi-cap-nhat?page=1');
             const top5 = (res?.data?.items || []).slice(0, 5);
+            
+            // Fix #3: Crash check
+            if(top5.length === 0) return;
+
             let slidesHtml = '';
             top5.forEach((m, idx) => {
                 slidesHtml += `
@@ -301,275 +343,281 @@
                     <div class="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent"></div>
                     <div class="absolute inset-0 z-20 container mx-auto px-4 flex items-center">
                         <div class="max-w-2xl mt-20 md:mt-0">
-                            <span class="bg-[#e50914] text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider mb-4 inline-block">Top Trending #${idx+1}</span>
+                            <span class="bg-[#e50914] text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider mb-4 inline-block shadow-lg">Top Trending #${idx+1}</span>
                             <h2 class="text-4xl md:text-6xl font-black text-white mb-4 uppercase leading-none text-shadow line-clamp-2">${m.name}</h2>
-                            <p class="text-gray-300 text-sm mb-6 max-w-xl font-medium line-clamp-2">${m.origin_name} | Năm: ${m.year}</p>
-                            <button onclick="playPhim('${m.slug}')" class="bg-white text-black px-8 py-3 rounded font-bold hover:bg-[#e50914] hover:text-white transition uppercase text-sm flex items-center gap-2"><i class="fas fa-play"></i> Phát Ngay</button>
+                            <p class="text-gray-300 text-sm md:text-lg mb-6 max-w-xl font-medium line-clamp-2">${m.origin_name} | Năm: ${m.year}</p>
+                            <button onclick="playPhim('${m.slug}')" class="bg-white text-black px-8 py-3.5 rounded font-bold hover:bg-[#e50914] hover:text-white transition uppercase text-sm flex items-center gap-2 shadow-lg"><i class="fas fa-play text-lg"></i> Phát Ngay</button>
                         </div>
                     </div>
                 </div>`;
             });
             document.getElementById('bannerSlides').innerHTML = slidesHtml;
 
-            // Logic tự động xoay banner
             let curSlide = 0;
             setInterval(() => {
-                if(document.getElementById('homePage').classList.contains('hidden')) return; // Ngừng xoay nếu k ở trang chủ
+                if(document.getElementById('homePage').classList.contains('hidden')) return;
                 document.getElementById(`slide_${curSlide}`).classList.remove('active');
                 curSlide = (curSlide + 1) % top5.length;
                 document.getElementById(`slide_${curSlide}`).classList.add('active');
-            }, 5000);
+            }, 6000);
         }
 
-        // --- 4. SMART HISTORY & CONTINUE WATCHING ---
-        function getHistory() { return JSON.parse(localStorage.getItem('ryanphim_history_v9')) || {}; }
-        function saveHistory(slug, data) {
+        // --- SMART HISTORY & FAVORITES ---
+        function getHistory() { return JSON.parse(localStorage.getItem('ryanphim_history_v11')) || {}; }
+        function saveHistory(time, percent) {
             let hist = getHistory();
-            hist[slug] = { ...data, last_updated: Date.now() };
-            localStorage.setItem('ryanphim_history_v9', JSON.stringify(hist));
+            const curEpInfo = playState.eps_data[playState.server_idx].server_data[playState.ep_idx];
+            hist[playState.slug] = {
+                slug: playState.slug, name: playState.item.name, thumb_url: playState.item.thumb_url, year: playState.item.year,
+                ep_name: curEpInfo.name, server_idx: playState.server_idx, ep_idx: playState.ep_idx,
+                time: time, percent: percent, last_updated: Date.now()
+            };
+            if(Object.keys(hist).length > 50) { 
+                const sortedKeys = Object.keys(hist).sort((a,b) => hist[b].last_updated - hist[a].last_updated);
+                delete hist[sortedKeys[sortedKeys.length-1]];
+            }
+            localStorage.setItem('ryanphim_history_v11', JSON.stringify(hist));
         }
 
         function renderContinueWatching() {
-            const hist = getHistory();
-            const arr = Object.values(hist).sort((a,b) => b.last_updated - a.last_updated);
-            
-            // Lọc phim xem dở (percent > 0 và percent < 95)
+            const arr = Object.values(getHistory()).sort((a,b) => b.last_updated - a.last_updated);
             const watching = arr.filter(m => m.percent > 0 && m.percent < 95).slice(0, 10);
-            
             const sec = document.getElementById('continueWatchingSection');
-            if(watching.length > 0) {
-                sec.classList.remove('hidden');
-                document.getElementById('continueRow').innerHTML = watching.map(m => createCard(m, false, m)).join('');
-            } else {
-                sec.classList.add('hidden');
-            }
+            if(watching.length > 0) { sec.classList.remove('hidden'); document.getElementById('continueRow').innerHTML = watching.map(m => createCard(m, false, m)).join(''); } 
+            else sec.classList.add('hidden');
         }
 
-        // --- 5. SMART PLAYER (Resume, Skip Intro, Auto Next, Multi-Server) ---
+        function showHistory() {
+            closePlayer(); document.getElementById('homePage').classList.add('hidden'); document.getElementById('categoryPage').classList.remove('hidden');
+            document.getElementById('catTitle').innerText = "Lịch Sử Xem Phim"; setActiveNav('nav_history');
+            const arr = Object.values(getHistory()).sort((a,b) => b.last_updated - a.last_updated);
+            if (arr.length === 0) document.getElementById('catGrid').innerHTML = '<div class="col-span-full text-center py-20 text-gray-500 text-lg">Chưa có lịch sử xem.</div>';
+            else document.getElementById('catGrid').innerHTML = arr.map(m => createCard(m, true, m)).join('');
+            document.getElementById('pagination').innerHTML = `<button onclick="clearHistory()" class="px-6 py-2 bg-red-600 text-white font-bold rounded shadow-lg uppercase tracking-wider">Xóa Lịch Sử</button>`;
+        }
+        function clearHistory() { if(confirm('Xóa tất cả lịch sử?')) { localStorage.removeItem('ryanphim_history_v11'); showHistory(); renderContinueWatching(); showToast('Đã xóa lịch sử', 'success'); } }
+
+        function getFavs() { return JSON.parse(localStorage.getItem('ryanphim_favs_v11')) || {}; }
+        function toggleFavorite() {
+            let favs = getFavs();
+            const icon = document.getElementById('favIcon');
+            if(favs[playState.slug]) {
+                delete favs[playState.slug];
+                icon.className = 'far fa-heart text-white';
+                showToast('Đã bỏ khỏi Yêu Thích', 'info');
+            } else {
+                favs[playState.slug] = { slug: playState.slug, name: playState.item.name, thumb_url: playState.item.thumb_url, year: playState.item.year, last_updated: Date.now() };
+                icon.className = 'fas fa-heart text-red-500';
+                showToast('Đã thêm vào Yêu Thích', 'success');
+            }
+            localStorage.setItem('ryanphim_favs_v11', JSON.stringify(favs));
+        }
+
+        function showFavorites() {
+            closePlayer(); document.getElementById('homePage').classList.add('hidden'); document.getElementById('categoryPage').classList.remove('hidden');
+            document.getElementById('catTitle').innerText = "Phim Yêu Thích ❤️"; setActiveNav('');
+            const arr = Object.values(getFavs()).sort((a,b) => b.last_updated - a.last_updated);
+            if (arr.length === 0) document.getElementById('catGrid').innerHTML = '<div class="col-span-full text-center py-20 text-gray-500 text-lg">Tủ phim trống.</div>';
+            else document.getElementById('catGrid').innerHTML = arr.map(m => createCard(m, true)).join('');
+            document.getElementById('pagination').innerHTML = '';
+        }
+
+        function checkFavoriteStatus() {
+            const favs = getFavs();
+            const icon = document.getElementById('favIcon');
+            if(favs[playState.slug]) icon.className = 'fas fa-heart text-red-500';
+            else icon.className = 'far fa-heart text-white';
+        }
+
+        // --- SMART PLAYER ---
         async function playPhim(slug) {
             try {
+                showToast('Đang tải máy chủ phim...', 'info');
                 const res = await fetchCached(`phim/${slug}`);
+                if(!res || !res.data) { showToast('Lỗi máy chủ', 'error'); return; }
                 const item = res.data.item;
-                playState.slug = slug;
-                playState.eps_data = item.episodes; // Tất cả server
+                playState.item = item; playState.slug = slug; playState.eps_data = item.episodes;
                 
                 document.getElementById('playerArea').classList.remove('hidden');
                 document.getElementById('playTitle').innerText = item.name;
                 document.getElementById('playDesc').innerText = item.content.replace(/(<([^>]+)>)/gi, "");
-                
-                // Kiểm tra lịch sử để khôi phục
+                checkFavoriteStatus();
+
                 const hist = getHistory()[slug];
                 playState.server_idx = hist ? hist.server_idx : 0;
                 playState.ep_idx = hist ? hist.ep_idx : 0;
 
-                renderServerTabs();
-                renderEpisodes();
+                renderServerTabs(); renderEpisodes();
                 document.getElementById('playerArea').scrollIntoView({behavior:'smooth', block:'start'});
-            } catch(e) { alert("Lỗi tải phim!"); }
+            } catch(e) { showToast("Lỗi tải phim!", "error"); }
         }
 
         function renderServerTabs() {
-            const servers = playState.eps_data;
             let html = '';
-            servers.forEach((srv, idx) => {
+            playState.eps_data.forEach((srv, idx) => {
                 const cls = idx === playState.server_idx ? 'bg-[#e50914] text-white border-[#e50914]' : 'bg-transparent text-gray-400 border-gray-600 hover:text-white';
-                html += `<button onclick="changeServer(${idx})" class="px-3 py-1 border rounded text-xs font-bold transition ${cls}">${srv.server_name}</button>`;
+                html += `<button onclick="changeServer(${idx})" class="px-3 py-1 border rounded text-xs font-bold transition uppercase ${cls}">${srv.server_name}</button>`;
             });
             document.getElementById('serverList').innerHTML = html;
         }
 
-        function changeServer(idx) {
-            playState.server_idx = idx;
-            renderServerTabs();
-            renderEpisodes();
-        }
+        function changeServer(idx) { playState.server_idx = idx; renderServerTabs(); renderEpisodes(); }
 
         function renderEpisodes() {
             const eps = playState.eps_data[playState.server_idx].server_data;
             let html = '';
             eps.forEach((ep, idx) => {
-                const cls = idx === playState.ep_idx ? 'bg-[#e50914] text-white' : 'bg-[#333] text-gray-300 hover:bg-[#e50914]';
+                const cls = idx === playState.ep_idx ? 'bg-[#e50914] text-white shadow-lg' : 'bg-[#333] text-gray-300 hover:bg-[#e50914] hover:text-white';
                 html += `<button id="btn_ep_${idx}" onclick="playEpisode(${idx})" class="px-4 py-2 text-xs font-bold rounded transition uppercase ${cls}">${ep.name}</button>`;
             });
             document.getElementById('epList').innerHTML = html;
-            playEpisode(playState.ep_idx, true); // Play tập đã chọn
+            playEpisode(playState.ep_idx, true);
         }
 
         function playEpisode(idx, isAutoResume = false) {
-            // Đổi màu nút
-            document.querySelectorAll('#epList button').forEach(b => b.classList.remove('bg-[#e50914]', 'text-white'));
-            document.querySelectorAll('#epList button').forEach(b => b.classList.add('bg-[#333]', 'text-gray-300'));
+            document.querySelectorAll('#epList button').forEach(b => { b.classList.remove('bg-[#e50914]', 'text-white', 'shadow-lg'); b.classList.add('bg-[#333]', 'text-gray-300'); });
             const activeBtn = document.getElementById(`btn_ep_${idx}`);
-            if(activeBtn) { activeBtn.classList.remove('bg-[#333]'); activeBtn.classList.add('bg-[#e50914]', 'text-white'); }
+            if(activeBtn) { activeBtn.classList.remove('bg-[#333]', 'text-gray-300'); activeBtn.classList.add('bg-[#e50914]', 'text-white', 'shadow-lg'); }
 
-            playState.ep_idx = idx;
-            isNextCancelled = false; // Reset cờ chặn auto next
-            document.getElementById('nextEpOverlay').classList.add('hidden');
-            
+            playState.ep_idx = idx; isNextCancelled = false; document.getElementById('nextEpOverlay').classList.add('hidden');
             const ep = playState.eps_data[playState.server_idx].server_data[idx];
             loadStream(ep.link_m3u8, ep.link_embed, isAutoResume);
+            if(!isAutoResume) saveHistory(0, 0); 
         }
 
         function loadStream(link_m3u8, link_embed, isAutoResume) {
-            const video = document.getElementById('mainVideo');
-            const iframe = document.getElementById('backupIframe');
+            const video = document.getElementById('mainVideo'); const iframe = document.getElementById('backupIframe');
             iframe.classList.add('hidden'); iframe.src = ''; video.classList.remove('hidden');
-
             if (!link_m3u8) return useFallbackIframe(link_embed);
 
-            // Thiết lập HLS & Plyr
             if (Hls.isSupported()) {
-                if (hlsInstance) hlsInstance.destroy();
+                if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; } // Fix #5: Mem leak
                 hlsInstance = new Hls();
                 hlsInstance.on(Hls.Events.ERROR, (e, data) => { if (data.fatal) useFallbackIframe(link_embed); });
-                hlsInstance.loadSource(link_m3u8);
-                hlsInstance.attachMedia(video);
-                
-                hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-                    initPlyr(video, isAutoResume);
-                });
+                hlsInstance.loadSource(link_m3u8); hlsInstance.attachMedia(video);
+                hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => initPlyr(video, isAutoResume));
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = link_m3u8;
-                initPlyr(video, isAutoResume);
+                video.src = link_m3u8; initPlyr(video, isAutoResume);
             } else useFallbackIframe(link_embed);
         }
 
         function initPlyr(video, isAutoResume) {
-            if (plyrPlayer) plyrPlayer.destroy();
-            plyrPlayer = new Plyr(video, {
-                controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'fullscreen']
-            });
+            if (plyrPlayer) { plyrPlayer.destroy(); plyrPlayer = null; }
+            plyrPlayer = new Plyr(video, { controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'settings', 'fullscreen'] });
 
-            // Logic Resume
             plyrPlayer.on('loadedmetadata', () => {
                 if(isAutoResume) {
                     const hist = getHistory()[playState.slug];
-                    if(hist && hist.ep_idx === playState.ep_idx && hist.time > 0 && hist.percent < 95) {
-                        plyrPlayer.currentTime = hist.time;
-                    }
+                    if(hist && hist.ep_idx === playState.ep_idx && hist.time > 0 && hist.percent < 95) plyrPlayer.currentTime = hist.time;
                 }
                 plyrPlayer.play();
             });
 
-            // Tracking Progress, Skip Intro & Auto Next
             plyrPlayer.on('timeupdate', () => {
-                const t = plyrPlayer.currentTime;
-                const d = plyrPlayer.duration;
+                const t = plyrPlayer.currentTime, d = plyrPlayer.duration;
                 if(!d) return;
-
-                // Lưu Progress (>30s mới lưu)
                 if (t > 30) {
                     let pct = (t / d) * 100;
-                    if(pct > 95) pct = 100; // Reset nếu xem >95%
-                    const curEpInfo = playState.eps_data[playState.server_idx].server_data[playState.ep_idx];
-                    
-                    saveHistory(playState.slug, {
-                        slug: playState.slug,
-                        name: document.getElementById('playTitle').innerText,
-                        thumb_url: document.getElementById('bannerImg').src, // mượn tạm ảnh banner
-                        ep_name: curEpInfo.name,
-                        server_idx: playState.server_idx,
-                        ep_idx: playState.ep_idx,
-                        time: pct === 100 ? 0 : t,
-                        percent: pct === 100 ? 0 : pct
-                    });
+                    saveHistory(pct > 95 ? 0 : t, pct > 95 ? 0 : pct);
                 }
-
-                // Skip Intro (Hiện nút từ 20s đến 80s)
                 const skipBtn = document.getElementById('skipIntroBtn');
-                if(t > 20 && t < 80) skipBtn.classList.remove('hidden');
-                else skipBtn.classList.add('hidden');
+                if(t > 20 && t < 80) skipBtn.classList.remove('hidden'); else skipBtn.classList.add('hidden');
 
-                // Auto Next Countdown (10s cuối)
                 const nextOverlay = document.getElementById('nextEpOverlay');
                 const epsCount = playState.eps_data[playState.server_idx].server_data.length;
-                
-                if (d - t < 10 && !isNextCancelled && playState.ep_idx < epsCount - 1) {
-                    nextOverlay.classList.remove('hidden');
-                    document.getElementById('nextCountdown').innerText = Math.ceil(d - t);
-                } else {
-                    nextOverlay.classList.add('hidden');
-                }
+                if (d - t < 10 && d - t > 0 && !isNextCancelled && playState.ep_idx < epsCount - 1) {
+                    nextOverlay.classList.remove('hidden'); document.getElementById('nextCountdown').innerText = Math.ceil(d - t);
+                } else nextOverlay.classList.add('hidden');
             });
 
-            // Khi kết thúc video
-            plyrPlayer.on('ended', () => {
-                if(!isNextCancelled) playNextEp();
-            });
+            plyrPlayer.on('ended', () => { if(!isNextCancelled) playNextEp(); });
         }
 
-        function skipIntro() { if(plyrPlayer) plyrPlayer.currentTime += 80; }
-        
+        function skipIntro() { if(plyrPlayer) { plyrPlayer.currentTime += 80; showToast('Đã bỏ qua giới thiệu', 'success'); } }
         function playNextEp() {
             const epsCount = playState.eps_data[playState.server_idx].server_data.length;
-            if(playState.ep_idx < epsCount - 1) {
-                playEpisode(playState.ep_idx + 1);
-            }
+            if(playState.ep_idx < epsCount - 1) { showToast('Đang tải tập tiếp theo...', 'info'); playEpisode(playState.ep_idx + 1); }
         }
         function cancelNextEp() { isNextCancelled = true; document.getElementById('nextEpOverlay').classList.add('hidden'); }
 
         function useFallbackIframe(link) {
             const v = document.getElementById('mainVideo'), i = document.getElementById('backupIframe');
-            if (hlsInstance) hlsInstance.destroy(); if (plyrPlayer) { plyrPlayer.destroy(); plyrPlayer = null; }
+            if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; } // Fix #5
+            if (plyrPlayer) { plyrPlayer.destroy(); plyrPlayer = null; }
             v.classList.add('hidden'); i.classList.remove('hidden'); i.src = link;
         }
 
         function closePlayer() {
-            document.getElementById('playerArea').classList.add('hidden');
-            document.getElementById('backupIframe').src = '';
-            if (hlsInstance) hlsInstance.destroy();
+            document.getElementById('playerArea').classList.add('hidden'); document.getElementById('backupIframe').src = '';
+            if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; } // Fix #5
             if (plyrPlayer) { plyrPlayer.stop(); document.getElementById('mainVideo').src = ''; }
-            renderContinueWatching(); // Update lại dải Continue
+            renderContinueWatching();
         }
 
-        // --- 6. LIVE SEARCH THÔNG MINH ---
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                if(e.target.tagName === 'INPUT' || !plyrPlayer || document.getElementById('playerArea').classList.contains('hidden')) return;
+                switch(e.key.toLowerCase()) {
+                    case ' ': e.preventDefault(); plyrPlayer.togglePlay(); break;
+                    case 'arrowleft': plyrPlayer.rewind(10); showToast('Tua lùi 10s', 'info'); break;
+                    case 'arrowright': plyrPlayer.forward(10); showToast('Tua tới 10s', 'info'); break;
+                    case 'f': plyrPlayer.fullscreen.toggle(); break;
+                    case 'n': playNextEp(); break;
+                }
+            });
+        }
+
+        // --- LIVE SEARCH ---
         async function liveSearch() {
             const kw = document.getElementById('searchInput').value.trim();
             const box = document.getElementById('liveSearchResults');
             if(kw.length < 2) { box.classList.add('hidden'); return; }
-            
-            box.classList.remove('hidden');
-            box.innerHTML = '<div class="text-gray-400 text-center py-2 text-sm"><i class="fas fa-spinner fa-spin"></i> Đang tìm...</div>';
+            box.classList.remove('hidden'); box.innerHTML = '<div class="text-gray-400 text-center py-2 text-sm"><i class="fas fa-spinner fa-spin"></i> Đang tìm...</div>';
             
             const res = await fetchCached(`tim-kiem?keyword=${encodeURIComponent(kw)}`, 5);
-            const items = (res?.data?.items || []).slice(0, 5); // Lấy top 5
-            
+            const items = (res?.data?.items || []).slice(0, 5);
             if(items.length === 0) { box.innerHTML = '<div class="text-gray-500 text-center py-2 text-sm">Không tìm thấy phim</div>'; return; }
             
-            let html = '';
-            items.forEach(m => {
-                html += `
-                <div onclick="playPhim('${m.slug}'); document.getElementById('liveSearchResults').classList.add('hidden');" class="flex gap-3 items-center hover:bg-[#333] p-2 rounded cursor-pointer transition">
-                    <img src="${getImg(m.thumb_url)}" class="w-10 h-14 object-cover rounded">
+            let html = items.map(m => `
+                <div onclick="playPhim('${m.slug}'); document.getElementById('liveSearchResults').classList.add('hidden'); document.getElementById('searchInput').value='';" class="flex gap-3 items-center hover:bg-[#333] p-2 rounded cursor-pointer transition">
+                    <img src="${getImg(m.thumb_url)}" class="w-10 h-14 object-cover rounded shadow-md">
                     <div>
                         <h4 class="text-white text-sm font-bold truncate w-56">${m.name}</h4>
-                        <p class="text-xs text-gray-400">${m.year || ''}</p>
+                        <p class="text-xs text-gray-400 mt-1">${m.origin_name || m.year || ''}</p>
                     </div>
-                </div>`;
-            });
+                </div>`).join('');
             html += `<div onclick="showCategory('tim-kiem?keyword=${encodeURIComponent(kw)}', 'KẾT QUẢ TÌM KIẾM')" class="text-center text-[#e50914] text-xs font-bold py-2 cursor-pointer hover:underline border-t border-gray-700 mt-1">Xem tất cả kết quả</div>`;
             box.innerHTML = html;
         }
 
-        // --- 7. UTILS & NAVIGATION ---
+        // --- UTILS & NAVIGATION (FIX #7 Mobile UI) ---
         async function loadDynamicMenus() {
-            const [resG, resC] = await Promise.all([fetchCached('the-loai', 1440), fetchCached('quoc-gia', 1440)]); // Cache 24h
+            const [resG, resC] = await Promise.all([fetchCached('the-loai', 1440), fetchCached('quoc-gia', 1440)]);
             if(resG) document.getElementById('desktopGenre').innerHTML = resG.data.items.map(i => `<a onclick="showCategory('the-loai/${i.slug}', '${i.name}')" class="dropdown-item">${i.name}</a>`).join('');
         }
         
-        function showHome() { document.getElementById('homePage').classList.remove('hidden'); document.getElementById('categoryPage').classList.add('hidden'); closePlayer(); window.scrollTo(0,0); }
+        function showHome() { document.getElementById('homePage').classList.remove('hidden'); document.getElementById('categoryPage').classList.add('hidden'); closePlayer(); window.scrollTo(0,0); setActiveNav('nav_home'); }
         
         async function showCategory(endpoint, title) { 
-            currentEndpoint = endpoint; currentPage = 1; 
-            document.getElementById('homePage').classList.add('hidden'); document.getElementById('categoryPage').classList.remove('hidden'); 
+            currentEndpoint = endpoint; currentPage = 1; document.getElementById('homePage').classList.add('hidden'); document.getElementById('categoryPage').classList.remove('hidden'); 
             document.getElementById('catTitle').innerText = title; document.getElementById('catGrid').innerHTML=''; document.getElementById('pagination').innerHTML='';
-            closePlayer(); 
+            closePlayer(); document.getElementById('liveSearchResults').classList.add('hidden'); document.getElementById('searchInput').value='';
+            setActiveNav(endpoint.includes('phim-bo') ? 'nav_phimbo' : endpoint.includes('phim-le') ? 'nav_phimle' : '');
             
             const res = await fetchCached(`${endpoint}?page=1`);
-            const movies = res?.data?.items || [];
-            document.getElementById('catGrid').innerHTML = movies.map(m=>createCard(m, true)).join('');
+            document.getElementById('catGrid').innerHTML = (res?.data?.items || []).map(m=>createCard(m, true)).join('');
         }
-        function mobileNav(action) { document.getElementById('mobileMenu').classList.add('translate-x-full'); setTimeout(() => eval(action), 300); }
+
+        // Fix #7: Add/remove explicitly
+        function openMobileMenu() { document.getElementById('mobileMenu').classList.remove('translate-x-full'); document.getElementById('menuBackdrop').classList.remove('hidden'); }
+        function closeMobileMenu() { document.getElementById('mobileMenu').classList.add('translate-x-full'); document.getElementById('menuBackdrop').classList.add('hidden'); }
+        function openSearchOverlay() { const ov = document.getElementById('searchOverlay'); ov.classList.remove('hidden'); ov.classList.add('flex'); document.getElementById('mobileSearchInput').focus(); }
+        function closeSearchOverlay() { const ov = document.getElementById('searchOverlay'); ov.classList.add('hidden'); ov.classList.remove('flex'); }
+        
+        function mobileSearch() { const kw = document.getElementById('mobileSearchInput').value.trim(); if(kw) { closeSearchOverlay(); showCategory(`tim-kiem?keyword=${encodeURIComponent(kw)}`, `TÌM KIẾM: ${kw.toUpperCase()}`); document.getElementById('mobileSearchInput').value=''; } }
+        
+        // Fix #1: Thay đổi eval thành callback function
+        function mobileNav(callback) { closeMobileMenu(); setTimeout(callback, 300); }
 
         init();
     </script>
