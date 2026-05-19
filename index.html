@@ -22,7 +22,6 @@
         .snap-x { scroll-snap-type: x mandatory; }
         .snap-center { scroll-snap-align: center; }
 
-        /* [FIX 1 & 6] Animation & Nav-link CSS */
         .nav-link { color: #e5e5e5; font-weight: 500; font-size: 14px; transition: color 0.3s; cursor: pointer; position: relative; padding-bottom: 5px; }
         .nav-link:hover, .nav-link.active { color: #fff; font-weight: 700; }
         .nav-link.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--primary); border-radius: 2px; }
@@ -30,7 +29,6 @@
         .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Premium UI */
         .movie-card { transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); z-index: 1; }
         @media (hover: hover) { 
             .movie-card:hover { transform: scale(1.08) translateY(-5px); z-index: 20; box-shadow: 0 15px 30px rgba(229,9,20,0.3); border-radius: 8px; } 
@@ -38,11 +36,9 @@
         }
         .play-icon { opacity: 0; transform: scale(0.8); transition: 0.3s; }
         
-        /* Skeleton Shimmer */
         .skeleton { background: linear-gradient(90deg, #222 25%, #3a3a3a 50%, #222 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
-        /* Dropdown & Overlays */
         .banner-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease-in-out; }
         .banner-slide.active { opacity: 1; z-index: 10; }
         .dropdown:hover .dropdown-menu { display: grid; opacity: 1; transform: translateY(0); pointer-events: auto; }
@@ -184,22 +180,20 @@
         <div class="container mx-auto px-4 text-center">
             <img src="image_0.png" class="h-8 w-auto mx-auto mb-4 opacity-50 grayscale hover:grayscale-0 transition">
             <p class="text-gray-500 text-xs">© 2026 RYANPHIM. Nền tảng giải trí chất lượng cao.</p>
-            <p class="text-gray-600 text-[10px] mt-2">Dữ liệu được thu thập từ internet. Không lưu trữ tệp tin trên máy chủ.</p>
         </div>
     </footer>
 
     <script>
         const API = 'https://ophim1.com/v1/api';
-        const IMG_HOST = 'https://phimimg.com/'; 
+        let globalImgHost = 'https://phimimg.com/'; // Mặc định
         
         let currentEndpoint = '', currentPage = 1;
         let plyrPlayer = null, hlsInstance = null;
         let playState = { item: null, slug: '', ep_idx: 0, server_idx: 0, eps_data: null };
         let isNextCancelled = false;
 
-        // --- CORE (FIXED CACHE KEY) ---
+        // --- CORE BẮT ẢNH DYNAMIC & CACHE ---
         async function fetchCached(endpoint, ttlMins = 30) {
-            // Fix #4: Dùng btoa để tạo cache key an toàn
             const safeKey = btoa(unescape(encodeURIComponent(endpoint))).replace(/=/g, '');
             const cacheKey = `ryan_cache_${safeKey}`;
             const cached = localStorage.getItem(cacheKey);
@@ -210,7 +204,13 @@
             }
             try {
                 const res = await fetch(`${API}/${endpoint}`).then(r=>r.json());
-                if(res.status) localStorage.setItem(cacheKey, JSON.stringify({time: Date.now(), data: res}));
+                if(res.status) {
+                    // Update Image Host tự động từ API
+                    if(res.data && res.data.APP_DOMAIN_CDN_IMAGE) {
+                        globalImgHost = res.data.APP_DOMAIN_CDN_IMAGE + (res.data.APP_DOMAIN_CDN_IMAGE.endsWith('/') ? '' : '/');
+                    }
+                    localStorage.setItem(cacheKey, JSON.stringify({time: Date.now(), data: res}));
+                }
                 return res;
             } catch(e) { return null; }
         }
@@ -220,12 +220,21 @@
             return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func(...args), wait); };
         }
 
+        // HÀM LẤY ẢNH THÔNG MINH
         function getImg(thumb) {
-            if(!thumb) return 'https://via.placeholder.com/300x450';
-            return thumb.startsWith('http') ? thumb : IMG_HOST + thumb.replace(/^\//, '');
+            if(!thumb) return 'https://via.placeholder.com/300x450?text=No+Image';
+            return thumb.startsWith('http') ? thumb : globalImgHost + thumb.replace(/^\//, '');
         }
 
-        // --- TOAST ---
+        // HÀM FALLBACK KHI ẢNH LỖI
+        function fallbackImg(el, thumb) {
+            if(!el.src.includes('img.ophim.live') && thumb) {
+                el.src = 'https://img.ophim.live/uploads/movies/' + thumb.replace(/^\//, '');
+            } else {
+                el.src = 'https://via.placeholder.com/300x450?text=Loi+Anh';
+            }
+        }
+
         function showToast(msg, type='success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -233,12 +242,10 @@
             toast.className = `bg-[#181818] border border-gray-700 text-white px-4 py-3 rounded shadow-2xl transition-all duration-300 transform translate-x-full opacity-0 flex items-center gap-3`;
             toast.innerHTML = `<i class="fas ${icon} text-lg"></i> <span class="font-bold text-sm">${msg}</span>`;
             container.appendChild(toast);
-            
             setTimeout(() => toast.classList.remove('translate-x-full', 'opacity-0'), 10);
             setTimeout(() => { toast.classList.add('translate-x-full', 'opacity-0'); setTimeout(()=>toast.remove(), 300); }, 3000);
         }
 
-        // --- INIT ---
         async function init() {
             loadDynamicMenus();
             loadBanners();
@@ -263,7 +270,6 @@
             if(document.getElementById(id)) document.getElementById(id).classList.add('active');
         }
 
-        // --- UI COMPONENTS ---
         function buildSkeletonRow(title) {
             let skels = '';
             for(let i=0; i<6; i++) skels += `<div class="w-[140px] md:w-[220px] aspect-[2/3] skeleton flex-shrink-0 snap-center"></div>`;
@@ -274,12 +280,13 @@
             </div>`;
         }
 
+        // TÍCH HỢP ONERROR CHO ẢNH
         function createCard(m, isGrid=false, historyData=null) {
             const width = isGrid ? 'w-full' : 'w-[140px] md:w-[220px] flex-shrink-0 snap-center';
             let bgBadge = 'bg-[#e50914]';
             let epLabel = m.episode_current || m.quality || 'HD';
             if (epLabel.toLowerCase().includes('trailer')) bgBadge = 'bg-gray-600'; 
-            else if (epLabel.toLowerCase().includes('full')) bgBadge = 'bg-green-600'; 
+            else if (epLabel.toLowerCase().includes('full') || epLabel.toLowerCase().includes('hoàn')) bgBadge = 'bg-green-600'; 
 
             let progressBar = '';
             if (historyData && historyData.percent > 0) {
@@ -289,7 +296,7 @@
             return `
             <div onclick="playPhim('${m.slug}')" class="${width} movie-card cursor-pointer relative animate-fade-in">
                 <div class="aspect-[2/3] rounded overflow-hidden bg-[#222] relative border border-white/5">
-                    <img src="${getImg(m.thumb_url)}" class="w-full h-full object-cover" loading="lazy">
+                    <img src="${getImg(m.thumb_url)}" onerror="fallbackImg(this, '${m.thumb_url}')" class="w-full h-full object-cover" loading="lazy">
                     <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center play-icon backdrop-blur-sm"><i class="fas fa-play-circle text-6xl text-white shadow-2xl"></i></div>
                     <div class="absolute top-2 left-2 ${bgBadge} text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-md uppercase tracking-wider">${epLabel}</div>
                     <div class="absolute top-2 right-2 bg-black/70 backdrop-blur-md text-white text-[10px] font-bold px-1.5 py-0.5 rounded border border-white/20">${m.year || 'New'}</div>
@@ -328,18 +335,15 @@
         }
 
         async function loadBanners() {
-            // Fix #2: Dùng danh-sach/phim-moi-cap-nhat thay vì home
             const res = await fetchCached('danh-sach/phim-moi-cap-nhat?page=1');
             const top5 = (res?.data?.items || []).slice(0, 5);
-            
-            // Fix #3: Crash check
             if(top5.length === 0) return;
 
             let slidesHtml = '';
             top5.forEach((m, idx) => {
                 slidesHtml += `
                 <div class="banner-slide ${idx===0?'active':''}" id="slide_${idx}">
-                    <img src="${getImg(m.thumb_url)}" class="absolute inset-0 w-full h-full object-cover">
+                    <img src="${getImg(m.thumb_url)}" onerror="fallbackImg(this, '${m.thumb_url}')" class="absolute inset-0 w-full h-full object-cover">
                     <div class="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent"></div>
                     <div class="absolute inset-0 z-20 container mx-auto px-4 flex items-center">
                         <div class="max-w-2xl mt-20 md:mt-0">
@@ -362,8 +366,7 @@
             }, 6000);
         }
 
-        // --- SMART HISTORY & FAVORITES ---
-        function getHistory() { return JSON.parse(localStorage.getItem('ryanphim_history_v11')) || {}; }
+        function getHistory() { return JSON.parse(localStorage.getItem('ryanphim_history_v12')) || {}; }
         function saveHistory(time, percent) {
             let hist = getHistory();
             const curEpInfo = playState.eps_data[playState.server_idx].server_data[playState.ep_idx];
@@ -376,7 +379,7 @@
                 const sortedKeys = Object.keys(hist).sort((a,b) => hist[b].last_updated - hist[a].last_updated);
                 delete hist[sortedKeys[sortedKeys.length-1]];
             }
-            localStorage.setItem('ryanphim_history_v11', JSON.stringify(hist));
+            localStorage.setItem('ryanphim_history_v12', JSON.stringify(hist));
         }
 
         function renderContinueWatching() {
@@ -395,9 +398,9 @@
             else document.getElementById('catGrid').innerHTML = arr.map(m => createCard(m, true, m)).join('');
             document.getElementById('pagination').innerHTML = `<button onclick="clearHistory()" class="px-6 py-2 bg-red-600 text-white font-bold rounded shadow-lg uppercase tracking-wider">Xóa Lịch Sử</button>`;
         }
-        function clearHistory() { if(confirm('Xóa tất cả lịch sử?')) { localStorage.removeItem('ryanphim_history_v11'); showHistory(); renderContinueWatching(); showToast('Đã xóa lịch sử', 'success'); } }
+        function clearHistory() { if(confirm('Xóa tất cả lịch sử?')) { localStorage.removeItem('ryanphim_history_v12'); showHistory(); renderContinueWatching(); showToast('Đã xóa lịch sử', 'success'); } }
 
-        function getFavs() { return JSON.parse(localStorage.getItem('ryanphim_favs_v11')) || {}; }
+        function getFavs() { return JSON.parse(localStorage.getItem('ryanphim_favs_v12')) || {}; }
         function toggleFavorite() {
             let favs = getFavs();
             const icon = document.getElementById('favIcon');
@@ -410,7 +413,7 @@
                 icon.className = 'fas fa-heart text-red-500';
                 showToast('Đã thêm vào Yêu Thích', 'success');
             }
-            localStorage.setItem('ryanphim_favs_v11', JSON.stringify(favs));
+            localStorage.setItem('ryanphim_favs_v12', JSON.stringify(favs));
         }
 
         function showFavorites() {
@@ -429,7 +432,6 @@
             else icon.className = 'far fa-heart text-white';
         }
 
-        // --- SMART PLAYER ---
         async function playPhim(slug) {
             try {
                 showToast('Đang tải máy chủ phim...', 'info');
@@ -491,7 +493,7 @@
             if (!link_m3u8) return useFallbackIframe(link_embed);
 
             if (Hls.isSupported()) {
-                if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; } // Fix #5: Mem leak
+                if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
                 hlsInstance = new Hls();
                 hlsInstance.on(Hls.Events.ERROR, (e, data) => { if (data.fatal) useFallbackIframe(link_embed); });
                 hlsInstance.loadSource(link_m3u8); hlsInstance.attachMedia(video);
@@ -542,14 +544,14 @@
 
         function useFallbackIframe(link) {
             const v = document.getElementById('mainVideo'), i = document.getElementById('backupIframe');
-            if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; } // Fix #5
+            if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; } 
             if (plyrPlayer) { plyrPlayer.destroy(); plyrPlayer = null; }
             v.classList.add('hidden'); i.classList.remove('hidden'); i.src = link;
         }
 
         function closePlayer() {
             document.getElementById('playerArea').classList.add('hidden'); document.getElementById('backupIframe').src = '';
-            if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; } // Fix #5
+            if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; } 
             if (plyrPlayer) { plyrPlayer.stop(); document.getElementById('mainVideo').src = ''; }
             renderContinueWatching();
         }
@@ -567,7 +569,6 @@
             });
         }
 
-        // --- LIVE SEARCH ---
         async function liveSearch() {
             const kw = document.getElementById('searchInput').value.trim();
             const box = document.getElementById('liveSearchResults');
@@ -580,7 +581,7 @@
             
             let html = items.map(m => `
                 <div onclick="playPhim('${m.slug}'); document.getElementById('liveSearchResults').classList.add('hidden'); document.getElementById('searchInput').value='';" class="flex gap-3 items-center hover:bg-[#333] p-2 rounded cursor-pointer transition">
-                    <img src="${getImg(m.thumb_url)}" class="w-10 h-14 object-cover rounded shadow-md">
+                    <img src="${getImg(m.thumb_url)}" onerror="fallbackImg(this, '${m.thumb_url}')" class="w-10 h-14 object-cover rounded shadow-md">
                     <div>
                         <h4 class="text-white text-sm font-bold truncate w-56">${m.name}</h4>
                         <p class="text-xs text-gray-400 mt-1">${m.origin_name || m.year || ''}</p>
@@ -590,7 +591,6 @@
             box.innerHTML = html;
         }
 
-        // --- UTILS & NAVIGATION (FIX #7 Mobile UI) ---
         async function loadDynamicMenus() {
             const [resG, resC] = await Promise.all([fetchCached('the-loai', 1440), fetchCached('quoc-gia', 1440)]);
             if(resG) document.getElementById('desktopGenre').innerHTML = resG.data.items.map(i => `<a onclick="showCategory('the-loai/${i.slug}', '${i.name}')" class="dropdown-item">${i.name}</a>`).join('');
@@ -608,18 +608,5 @@
             document.getElementById('catGrid').innerHTML = (res?.data?.items || []).map(m=>createCard(m, true)).join('');
         }
 
-        // Fix #7: Add/remove explicitly
         function openMobileMenu() { document.getElementById('mobileMenu').classList.remove('translate-x-full'); document.getElementById('menuBackdrop').classList.remove('hidden'); }
-        function closeMobileMenu() { document.getElementById('mobileMenu').classList.add('translate-x-full'); document.getElementById('menuBackdrop').classList.add('hidden'); }
-        function openSearchOverlay() { const ov = document.getElementById('searchOverlay'); ov.classList.remove('hidden'); ov.classList.add('flex'); document.getElementById('mobileSearchInput').focus(); }
-        function closeSearchOverlay() { const ov = document.getElementById('searchOverlay'); ov.classList.add('hidden'); ov.classList.remove('flex'); }
-        
-        function mobileSearch() { const kw = document.getElementById('mobileSearchInput').value.trim(); if(kw) { closeSearchOverlay(); showCategory(`tim-kiem?keyword=${encodeURIComponent(kw)}`, `TÌM KIẾM: ${kw.toUpperCase()}`); document.getElementById('mobileSearchInput').value=''; } }
-        
-        // Fix #1: Thay đổi eval thành callback function
-        function mobileNav(callback) { closeMobileMenu(); setTimeout(callback, 300); }
-
-        init();
-    </script>
-</body>
-</html>
+        function closeMobileMenu() { document.getElementById('mobileMenu').classList.add('translate-x-full
