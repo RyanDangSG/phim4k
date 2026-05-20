@@ -538,7 +538,7 @@
             <div class="container mx-auto px-0 md:px-4">
                 <div class="aspect-video w-full bg-black shadow-2xl md:rounded-3xl overflow-hidden border border-white/10 relative group">
                     <video id="mainVideo" class="w-full h-full hidden" playsinline controls muted></video>
-                    <iframe id="backupIframe" class="w-full h-full hidden" frameborder="0" allowfullscreen referrerpolicy="no-referrer"></iframe>
+                    <iframe id="backupIframe" class="w-full h-full hidden" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="no-referrer"></iframe>
 
                     <button id="skipIntroBtn" class="skip-intro-btn hidden" onclick="skipIntro()">
                         <i class="fas fa-forward mr-2"></i> Bỏ qua giới thiệu
@@ -702,6 +702,7 @@
         let currentTitle = '';
         let currentPage = 1;
         let lastCategoryTotalPages = 1;
+        let lastCategoryItemCount = 0;
         let genres = [];
         let countries = [];
         let plyrPlayer = null;
@@ -1319,6 +1320,12 @@
         function renderEpisodes() {
             const server = playState.eps_data[playState.server_idx];
             const episodes = server?.server_data || [];
+            if (!episodes.length) {
+                document.getElementById('epList').innerHTML = '<div class="text-sm text-gray-400">Server này chưa có tập. Hãy đổi server khác.</div>';
+                showVideoError('Server này chưa có tập phim. Hãy bấm “Đổi server”.');
+                return;
+            }
+            playState.ep_idx = Math.max(0, Math.min(playState.ep_idx, episodes.length - 1));
             document.getElementById('epList').innerHTML = episodes.map((episode, index) => {
                 const active = index === playState.ep_idx;
                 return `<button id="btn_ep_${index}" onclick="playEpisode(${index})" class="${active ? 'bg-[#e50914] text-white shadow-lg' : 'bg-white/8 text-gray-300 hover:bg-white/15'} px-3 py-2 rounded-xl text-xs font-black transition border border-white/10">${escapeHtml(episode.name)}</button>`;
@@ -1336,54 +1343,114 @@
             document.getElementById('playEpisodeLabel').innerText = ep ? `Đang xem: ${ep.name}` : '';
         }
 
+        function getPlayableEpisode(index = playState.ep_idx) {
+            const server = playState.eps_data && playState.eps_data[playState.server_idx];
+            const episodes = server?.server_data || [];
+            return episodes[index] || null;
+        }
+
         function playEpisode(index, isAutoResume = false) {
-            playState.ep_idx = index;
+            const server = playState.eps_data && playState.eps_data[playState.server_idx];
+            const episodes = server?.server_data || [];
+            if (!episodes.length) return showVideoError('Server này chưa có tập phim. Hãy bấm “Đổi server”.');
+            playState.ep_idx = Math.max(0, Math.min(Number(index) || 0, episodes.length - 1));
             isNextCancelled = false;
             closeVideoError();
             document.getElementById('nextEpOverlay').classList.add('hidden');
             updateEpisodeActiveState();
-            const ep = getEpisodeInfo();
+            const ep = getPlayableEpisode();
             if (!ep) return showVideoError('Không tìm thấy tập phim.');
-            loadStream(ep.link_m3u8, ep.link_embed, isAutoResume);
+            loadStream(ep.link_m3u8 || ep.link_m3u8_url || ep.m3u8, ep.link_embed || ep.embed || ep.link, isAutoResume);
             if (!isAutoResume) saveHistory(0, 0);
+        }
+
+        function cleanupVideoBeforeLoad() {
+            const video = document.getElementById('mainVideo');
+            if (hlsInstance) {
+                hlsInstance.destroy();
+                hlsInstance = null;
+            }
+            if (plyrPlayer) {
+                plyrPlayer.destroy();
+                plyrPlayer = null;
+            }
+            video.pause();
+            video.removeAttribute('src');
+            video.load();
+        }
+
+        function normalizeStreamUrl(url) {
+            if (!url) return '';
+            return String(url).trim().replace(/\s/g, '%20');
         }
 
         function loadStream(linkM3u8, linkEmbed, isAutoResume) {
             const video = document.getElementById('mainVideo');
             const iframe = document.getElementById('backupIframe');
+            const m3u8 = normalizeStreamUrl(linkM3u8);
+            const embed = normalizeStreamUrl(linkEmbed);
             iframe.classList.add('hidden');
             iframe.src = '';
             video.classList.remove('hidden');
-            if (!linkM3u8) return useFallbackIframe(linkEmbed);
-            try {
-                if (hlsInstance) {
-                    hlsInstance.destroy();
-                    hlsInstance = null;
+            cleanupVideoBeforeLoad();
+            if (!m3u8) return useFallbackIframe(embed);
+
+            let didStart = false;
+            let fallbackTimer = setTimeout(() => {
+                if (!didStart) {
+                    if (embed) useFallbackIframe(embed);
+                    else showVideoError('Nguồn video tải quá lâu. Bạn thử lại hoặc đổi server.');
                 }
+            }, 12000);
+
+            const markStarted = () => {
+                didStart = true;
+                clearTimeout(fallbackTimer);
+            };
+
+            try {
                 if (Hls.isSupported()) {
                     hlsInstance = new Hls({
                         maxBufferLength: 60,
-                        enableWorker: true
+                        enableWorker: true,
+                        lowLatencyMode: false
                     });
                     hlsInstance.on(Hls.Events.ERROR, (event, data) => {
                         console.warn('HLS error', data);
-                        if (data.fatal) {
-                            if (linkEmbed) useFallbackIframe(linkEmbed);
-                            else showVideoError('Nguồn HLS bị lỗi và không có link dự phòng.');
+                        if (!data.fatal) return;
+                        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                            try { hlsInstance.startLoad(); return; } catch (_) {}
                         }
+                        if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                            try { hlsInstance.recoverMediaError(); return; } catch (_) {}
+                        }
+                        clearTimeout(fallbackTimer);
+                        if (embed) useFallbackIframe(embed);
+                        else showVideoError('Nguồn HLS của tập này bị lỗi. Hãy thử đổi server.');
                     });
-                    hlsInstance.loadSource(linkM3u8);
+                    hlsInstance.loadSource(m3u8);
                     hlsInstance.attachMedia(video);
                     hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => initPlyr(video, isAutoResume));
+                    video.addEventListener('loadedmetadata', markStarted, { once: true });
+                    video.addEventListener('canplay', markStarted, { once: true });
                 } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                    video.src = linkM3u8;
+                    video.src = m3u8;
+                    video.addEventListener('loadedmetadata', markStarted, { once: true });
+                    video.addEventListener('canplay', markStarted, { once: true });
+                    video.addEventListener('error', () => {
+                        clearTimeout(fallbackTimer);
+                        if (embed) useFallbackIframe(embed);
+                        else showVideoError('Trình duyệt không phát được tập này.');
+                    }, { once: true });
                     initPlyr(video, isAutoResume);
                 } else {
-                    useFallbackIframe(linkEmbed);
+                    clearTimeout(fallbackTimer);
+                    useFallbackIframe(embed);
                 }
             } catch (error) {
                 console.error(error);
-                if (linkEmbed) useFallbackIframe(linkEmbed);
+                clearTimeout(fallbackTimer);
+                if (embed) useFallbackIframe(embed);
                 else showVideoError('Trình duyệt không phát được nguồn này.');
             }
         }
@@ -1622,30 +1689,53 @@
             const endpointWithPage = buildEndpoint(endpoint, { page });
             const response = await fetchCached(endpointWithPage, 20);
             const items = response?.data?.items || [];
-            const params = response?.data?.params || response?.data?.seoOnPage || {};
-            lastCategoryTotalPages = Number(response?.data?.params?.pagination?.totalPages || response?.data?.params?.pagination?.total_page || 1) || 1;
+            const pagination = response?.data?.params?.pagination || response?.data?.pagination || {};
+            const rawTotalPages = Number(
+                pagination.totalPages ||
+                pagination.total_pages ||
+                pagination.lastPage ||
+                pagination.last_page ||
+                pagination.total_page ||
+                0
+            );
+            lastCategoryItemCount = items.length;
+            lastCategoryTotalPages = rawTotalPages > 0 ? rawTotalPages : (items.length ? page + 1 : page);
             if (!items.length) {
-                document.getElementById('catGrid').innerHTML = buildEmptyState('Không có phim phù hợp', 'Thử đổi bộ lọc hoặc tìm từ khóa khác.');
+                document.getElementById('catGrid').innerHTML = buildEmptyState('Không có phim phù hợp', 'Thử đổi bộ lọc hoặc quay lại trang trước.');
+                lastCategoryTotalPages = Math.max(1, page - 1);
+                renderPagination();
                 return;
             }
             document.getElementById('catGrid').innerHTML = items.map(movie => createCard(movie, true)).join('');
             renderPagination();
         }
 
+        function jsArg(value) {
+            return JSON.stringify(String(value ?? ''));
+        }
+
+        function goCategoryPage(page) {
+            const nextPage = Math.max(1, Number(page) || 1);
+            showCategory(currentEndpoint, currentTitle, nextPage, document.getElementById('catSubTitle')?.innerText || '');
+        }
+
         function renderPagination() {
-            const total = Math.max(1, Math.min(lastCategoryTotalPages, 500));
-            const page = currentPage;
+            const page = Math.max(1, currentPage);
+            const enoughItemsForNext = lastCategoryItemCount >= 8;
+            const total = Math.max(1, Math.min(Math.max(lastCategoryTotalPages, enoughItemsForNext ? page + 1 : page), 500));
+            const canPrev = page > 1;
+            const canNext = page < total || enoughItemsForNext;
             const pages = new Set([1, total, page, page - 1, page + 1, page - 2, page + 2]);
             const validPages = [...pages].filter(p => p >= 1 && p <= total).sort((a, b) => a - b);
             let html = '';
-            html += `<button ${page <= 1 ? 'disabled' : ''} onclick="showCategory('${escapeHtml(currentEndpoint)}','${escapeHtml(currentTitle)}',${page - 1})" class="btn-ghost !py-2 !px-3 text-sm disabled:opacity-40"><i class="fas fa-chevron-left"></i></button>`;
+            html += `<button ${canPrev ? '' : 'disabled'} onclick="goCategoryPage(${page - 1})" class="btn-ghost !py-2 !px-3 text-sm disabled:opacity-40 disabled:cursor-not-allowed" title="Trang trước"><i class="fas fa-chevron-left"></i></button>`;
             let prev = 0;
             validPages.forEach(p => {
                 if (p - prev > 1) html += `<span class="text-gray-500 font-black px-1">...</span>`;
-                html += `<button onclick="showCategory('${escapeHtml(currentEndpoint)}','${escapeHtml(currentTitle)}',${p})" class="${p === page ? 'btn-primary' : 'btn-ghost'} !py-2 !px-4 text-sm">${p}</button>`;
+                html += `<button onclick="goCategoryPage(${p})" class="${p === page ? 'btn-primary' : 'btn-ghost'} !py-2 !px-4 text-sm">${p}</button>`;
                 prev = p;
             });
-            html += `<button ${page >= total ? 'disabled' : ''} onclick="showCategory('${escapeHtml(currentEndpoint)}','${escapeHtml(currentTitle)}',${page + 1})" class="btn-ghost !py-2 !px-3 text-sm disabled:opacity-40"><i class="fas fa-chevron-right"></i></button>`;
+            html += `<button ${canNext ? '' : 'disabled'} onclick="goCategoryPage(${page + 1})" class="btn-ghost !py-2 !px-3 text-sm disabled:opacity-40 disabled:cursor-not-allowed" title="Trang sau"><i class="fas fa-chevron-right"></i></button>`;
             document.getElementById('pagination').innerHTML = html;
         }
 
