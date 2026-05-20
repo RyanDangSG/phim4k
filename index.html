@@ -583,6 +583,10 @@
                                         <i id="favIcon" class="far fa-heart text-white"></i>
                                         <span class="hidden md:inline">Yêu thích</span>
                                     </button>
+                                    <button id="pipBtn" onclick="togglePictureInPicture()" class="btn-ghost !p-3" title="Hình trong hình">
+                                        <i id="pipIcon" class="fas fa-clone text-white"></i>
+                                        <span class="hidden md:inline">PiP</span>
+                                    </button>
                                     <button onclick="closePlayer()" class="btn-ghost !p-3" title="Đóng">
                                         <i class="fas fa-arrow-left"></i>
                                         <span class="hidden md:inline">Đóng</span>
@@ -1390,7 +1394,7 @@
                 plyrPlayer = null;
             }
             plyrPlayer = new Plyr(video, {
-                controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'settings', 'fullscreen'],
+                controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'settings', 'pip', 'fullscreen'],
                 keyboard: { focused: true, global: false },
                 settings: ['speed'],
                 speed: { selected: 1, options: [0.75, 1, 1.25, 1.5, 2] }
@@ -1406,11 +1410,58 @@
                 plyrPlayer.play().catch(() => showToast('Bấm phát để xem phim', 'info'));
             });
             plyrPlayer.on('timeupdate', handleTimeUpdate);
+            video.addEventListener('enterpictureinpicture', updatePipButtonState);
+            video.addEventListener('leavepictureinpicture', updatePipButtonState);
+            updatePipButtonState();
             plyrPlayer.on('ended', () => {
                 saveHistory(0, 0);
                 if (!isNextCancelled) playNextEp();
             });
             plyrPlayer.on('error', () => showVideoError('Video bị lỗi khi phát.'));
+        }
+
+        async function togglePictureInPicture() {
+            const video = document.getElementById('mainVideo');
+            const iframe = document.getElementById('backupIframe');
+
+            if (!document.pictureInPictureEnabled || !video) {
+                showToast('Trình duyệt chưa hỗ trợ hình trong hình', 'error');
+                return;
+            }
+
+            if (!iframe.classList.contains('hidden')) {
+                showToast('PiP chỉ dùng được với trình phát video, không dùng được khi đang chạy iframe dự phòng', 'info');
+                return;
+            }
+
+            if (video.classList.contains('hidden') || (!video.currentSrc && !hlsInstance)) {
+                showToast('Hãy mở một tập phim trước khi bật PiP', 'info');
+                return;
+            }
+
+            try {
+                if (document.pictureInPictureElement) {
+                    await document.exitPictureInPicture();
+                    showToast('Đã tắt hình trong hình', 'info');
+                } else {
+                    await video.requestPictureInPicture();
+                    showToast('Đã bật hình trong hình', 'success');
+                }
+                updatePipButtonState();
+            } catch (error) {
+                console.warn(error);
+                showToast('Không bật được PiP trên nguồn phát này', 'error');
+            }
+        }
+
+        function updatePipButtonState() {
+            const btn = document.getElementById('pipBtn');
+            const icon = document.getElementById('pipIcon');
+            if (!btn || !icon) return;
+            const isActive = !!document.pictureInPictureElement;
+            btn.classList.toggle('bg-[#e50914]', isActive);
+            btn.classList.toggle('border-[#e50914]', isActive);
+            icon.className = isActive ? 'fas fa-compress text-white' : 'fas fa-clone text-white';
         }
 
         function handleTimeUpdate() {
@@ -1495,7 +1546,11 @@
             document.getElementById('nextEpOverlay').classList.add('hidden');
         }
 
-        function closePlayer(scroll = true) {
+        async function closePlayer(scroll = true) {
+            if (document.pictureInPictureElement) {
+                try { await document.exitPictureInPicture(); } catch (error) { console.warn(error); }
+            }
+            updatePipButtonState();
             document.getElementById('playerArea').classList.add('hidden');
             document.getElementById('backupIframe').src = '';
             closeVideoError();
@@ -1775,6 +1830,9 @@
                         break;
                     case 'n':
                         playNextEp();
+                        break;
+                    case 'p':
+                        togglePictureInPicture();
                         break;
                     case 'm':
                         plyrPlayer.muted = !plyrPlayer.muted;
