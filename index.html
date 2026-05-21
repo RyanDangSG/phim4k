@@ -461,6 +461,353 @@
                 font-size: 12px;
             }
         }
+
+
+        /* =========================================================
+           ROPHIM STYLE LAYER - giữ nguyên toàn bộ chức năng cũ
+           Chỉ thay đổi giao diện, không rút gọn code gốc.
+        ========================================================= */
+        :root {
+            --primary: #f5d56b;
+            --primary-2: #ffe58a;
+            --bg: #11131a;
+            --panel: #171a23;
+            --panel-2: #20232e;
+            --muted: #9ca3af;
+            --line: rgba(255, 255, 255, 0.11);
+            --plyr-color-main: #f5d56b;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at 10% 0%, rgba(245, 213, 107, 0.10), transparent 22rem),
+                linear-gradient(180deg, #12151d 0%, #11131a 38%, #0f1118 100%);
+        }
+
+        #navbar {
+            height: 72px !important;
+            background: rgba(13, 15, 23, 0.96) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+            box-shadow: 0 10px 28px rgba(0,0,0,0.22);
+        }
+
+        #navbar .container {
+            max-width: 1760px;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.88);
+            font-weight: 800;
+            padding-bottom: 4px;
+        }
+
+        .nav-link.active::after {
+            height: 2px;
+            background: var(--primary);
+            box-shadow: 0 0 14px rgba(245,213,107,0.55);
+        }
+
+        .glass {
+            background: rgba(23, 26, 35, 0.86);
+            border: 1px solid rgba(255,255,255,0.10);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.26);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ffe58a, #f3c850);
+            color: #151515;
+            box-shadow: 0 16px 35px rgba(245, 213, 107, 0.18);
+        }
+
+        .btn-ghost {
+            background: rgba(255,255,255,0.07);
+            border-color: rgba(255,255,255,0.10);
+            color: rgba(255,255,255,0.92);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(245,213,107,0.30);
+        }
+
+        .chip {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.86);
+        }
+
+        .form-control {
+            background: #1b1e28;
+            border-color: rgba(255,255,255,0.10);
+            border-radius: 10px;
+        }
+
+        .form-control:focus {
+            border-color: rgba(245,213,107,0.65);
+            box-shadow: 0 0 0 3px rgba(245,213,107,0.10);
+        }
+
+        #bannerContainer {
+            height: clamp(520px, 66vh, 720px) !important;
+            background: #0f1118 !important;
+        }
+
+        .hero-bg-img {
+            opacity: 0.50;
+            filter: saturate(1.02) contrast(1.05) brightness(0.9);
+        }
+
+        .hero-title {
+            max-width: 760px;
+            font-size: clamp(42px, 6vw, 82px) !important;
+            letter-spacing: -0.06em;
+        }
+
+        .hero-meta {
+            color: rgba(255,255,255,0.72) !important;
+        }
+
+        .poster-shell {
+            border-radius: 14px;
+            background: #1b1e28;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 16px 34px rgba(0,0,0,0.25);
+        }
+
+        @media (hover: hover) {
+            .poster-card:hover .poster-shell {
+                transform: translateY(-6px) scale(1.025);
+                border-color: rgba(245,213,107,0.38);
+                box-shadow: 0 24px 55px rgba(0,0,0,0.45);
+            }
+        }
+
+        .poster-gradient {
+            background: linear-gradient(to top, rgba(10,12,18,0.98), rgba(10,12,18,0.42), transparent 66%);
+        }
+
+        .dropdown-menu {
+            background: rgba(16,18,26,0.98);
+            border-top-color: var(--primary);
+            border-radius: 0 0 18px 18px;
+        }
+
+        .dropdown-item:hover {
+            color: #ffe58a;
+            background: rgba(245,213,107,0.10);
+        }
+
+        .rp-searchbox {
+            width: min(380px, 34vw);
+            height: 42px;
+            border-radius: 8px;
+            background: #20232d;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #fff;
+        }
+
+        .rp-logo-mark {
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
+            background: linear-gradient(145deg, #11141d, #191d28);
+            border: 1px solid rgba(255,255,255,0.10);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 0 1px rgba(245,213,107,0.14);
+        }
+
+        .rp-logo-play {
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            border: 4px solid #f5d56b;
+            position: relative;
+        }
+
+        .rp-logo-play::after {
+            content: '';
+            position: absolute;
+            left: 12px;
+            top: 8px;
+            border-left: 11px solid #fff;
+            border-top: 7px solid transparent;
+            border-bottom: 7px solid transparent;
+        }
+
+        .rp-section-panel {
+            margin-top: -18px;
+            margin-bottom: 48px;
+            border: 1px solid rgba(255,255,255,0.11);
+            border-radius: 18px;
+            overflow: hidden;
+            background: #151821;
+        }
+
+        .rp-section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #f4f4f5;
+            font-size: 16px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .rp-top-row {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 16px;
+            padding: 22px 28px 26px;
+            border-bottom: 1px solid rgba(255,255,255,0.10);
+        }
+
+        .rp-comment-card {
+            min-height: 126px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+            border: 1px solid rgba(255,255,255,0.07);
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .rp-comment-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--rp-bg, transparent);
+            background-size: cover;
+            background-position: center;
+            opacity: 0.18;
+            filter: blur(1px);
+        }
+
+        .rp-comment-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .rp-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 999px;
+            border: 2px solid rgba(245,213,107,0.70);
+            object-fit: cover;
+            background: #2a2e3a;
+        }
+
+        .rp-dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 0.75fr 1.45fr;
+            border-top: 0;
+        }
+
+        .rp-dashboard-col {
+            padding: 22px 28px;
+            min-height: 300px;
+            border-right: 1px solid rgba(255,255,255,0.10);
+        }
+
+        .rp-dashboard-col:last-child {
+            border-right: 0;
+        }
+
+        .rp-mini-item {
+            display: grid;
+            grid-template-columns: 34px 40px minmax(0,1fr);
+            align-items: center;
+            gap: 12px;
+            margin-top: 13px;
+            cursor: pointer;
+            color: rgba(255,255,255,0.88);
+        }
+
+        .rp-mini-index {
+            color: rgba(255,255,255,0.36);
+            font-weight: 900;
+        }
+
+        .rp-mini-poster {
+            width: 40px;
+            height: 54px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: #20232d;
+        }
+
+        .rp-mini-title {
+            font-size: 14px;
+            font-weight: 850;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .rp-hot-chip {
+            display: inline-flex;
+            align-items: center;
+            min-width: 92px;
+            justify-content: center;
+            padding: 8px 16px;
+            margin: 8px 8px 0 0;
+            border-radius: 999px;
+            background: rgba(245,213,107,0.12);
+            color: #ffe58a;
+            font-size: 13px;
+            font-weight: 900;
+            border: 1px solid rgba(245,213,107,0.16);
+            cursor: pointer;
+        }
+
+        .rp-live-item {
+            display: grid;
+            grid-template-columns: 42px minmax(0,1fr);
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: rgba(0,0,0,0.16);
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .rp-live-name {
+            font-size: 13px;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        .rp-live-text {
+            font-size: 12px;
+            color: rgba(255,255,255,0.54);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (max-width: 1180px) {
+            .rp-top-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .rp-dashboard-grid { grid-template-columns: 1fr 1fr; }
+            .rp-dashboard-col:nth-child(2) { border-right: 0; }
+            .rp-dashboard-col:nth-child(3), .rp-dashboard-col:nth-child(4) { border-top: 1px solid rgba(255,255,255,0.10); }
+        }
+
+        @media (max-width: 768px) {
+            #navbar { height: 64px !important; }
+            #bannerContainer { height: 500px !important; }
+            .rp-section-panel { margin-top: 20px; border-radius: 14px; }
+            .rp-top-row { grid-template-columns: 1fr; padding: 16px; }
+            .rp-dashboard-grid { grid-template-columns: 1fr; }
+            .rp-dashboard-col { border-right: 0; border-top: 1px solid rgba(255,255,255,0.10); padding: 16px; }
+            .rp-dashboard-col:first-child { border-top: 0; }
+            .rp-logo-mark { width: 42px; height: 42px; border-radius: 12px; }
+            .rp-logo-play { width: 28px; height: 28px; border-width: 3px; }
+            .rp-logo-play::after { left: 9px; top: 6px; border-left-width: 9px; border-top-width: 6px; border-bottom-width: 6px; }
+        }
+
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -614,6 +961,38 @@
         <div id="homePage" class="fade-in">
             <section class="relative w-full overflow-hidden bg-black" id="bannerContainer">
                 <div id="bannerSlides"></div>
+            </section>
+
+
+            <section id="roStylePanel" class="container mx-auto px-4 relative z-30 rp-section-panel">
+                <div class="px-7 pt-6 pb-2">
+                    <h2 class="rp-section-title"><i class="fas fa-medal text-[#f5d56b]"></i> Top bình luận</h2>
+                </div>
+                <div id="roTopComments" class="rp-top-row">
+                    <div class="h-28 rounded-xl shimmer"></div>
+                    <div class="h-28 rounded-xl shimmer"></div>
+                    <div class="h-28 rounded-xl shimmer"></div>
+                    <div class="h-28 rounded-xl shimmer"></div>
+                    <div class="h-28 rounded-xl shimmer"></div>
+                </div>
+                <div class="rp-dashboard-grid">
+                    <div class="rp-dashboard-col">
+                        <h3 class="rp-section-title"><i class="fas fa-clapperboard text-[#f5d56b]"></i> Sôi nổi nhất</h3>
+                        <div id="roPopularList"></div>
+                    </div>
+                    <div class="rp-dashboard-col">
+                        <h3 class="rp-section-title"><i class="fas fa-heart-circle-bolt text-[#f5d56b]"></i> Yêu thích nhất</h3>
+                        <div id="roFavoriteList"></div>
+                    </div>
+                    <div class="rp-dashboard-col">
+                        <h3 class="rp-section-title"><i class="fas fa-folder-plus text-[#f5d56b]"></i> Thể loại hot</h3>
+                        <div id="roHotGenres"></div>
+                    </div>
+                    <div class="rp-dashboard-col">
+                        <h3 class="rp-section-title"><i class="fas fa-bolt text-[#f5d56b]"></i> Bình luận mới</h3>
+                        <div id="roLiveComments"></div>
+                    </div>
+                </div>
             </section>
 
             <div id="continueWatchingSection" class="container mx-auto px-4 relative z-30 mt-[-46px] mb-12 hidden">
@@ -1012,6 +1391,7 @@
 
             await loadDynamicMenus();
             loadBanners();
+            loadRoStyleBlocks();
             renderContinueWatching();
             loadHomeRow('danh-sach/phim-moi-cap-nhat', 'Phim Mới Cập Nhật');
             loadHomeRow('the-loai/phim-chieu-rap', 'Chiếu Rạp Hot');
@@ -1027,6 +1407,96 @@
                 }
             });
             setActiveNav('nav_home');
+        }
+
+
+
+        function createRoCommentCard(movie, index) {
+            const avatar = getImg(movie.thumb_url || movie.poster_url);
+            const backdrop = getImg(movie.poster_url || movie.thumb_url);
+            const names = ['Quynan11', 'RyanFan', 'Mọt phim', 'cine lover', 'thỏ trader'];
+            const comments = [
+                'Phim này cuốn thật, xem một lèo không dứt.',
+                'Hình ảnh đẹp, nội dung ổn, đáng xem nha.',
+                'Ai thích thể loại này thì không nên bỏ qua.',
+                'Tập mới ra là phải xem liền.',
+                'Diễn xuất ổn, nhạc phim cũng hay.'
+            ];
+            return `
+                <article onclick="showMovieDetail('${slugSafe(movie.slug)}')" class="rp-comment-card" style="--rp-bg:url('${backdrop}')">
+                    <div class="flex items-center justify-between gap-3 mb-4">
+                        <img src="${avatar}" onerror="fallbackImg(this, '${escapeHtml(movie.thumb_url || movie.poster_url)}')" class="rp-avatar" alt="avatar" />
+                        <img src="${getImg(movie.thumb_url || movie.poster_url)}" onerror="fallbackImg(this, '${escapeHtml(movie.thumb_url || movie.poster_url)}')" class="w-12 h-16 rounded-md object-cover" alt="${escapeHtml(movie.name)}" />
+                    </div>
+                    <h4 class="text-sm font-black truncate">${escapeHtml(names[index % names.length])} <span class="text-[#f5d56b]">∞</span></h4>
+                    <p class="text-xs text-gray-300 line-clamp-2 mt-2">${escapeHtml(comments[index % comments.length])}</p>
+                </article>
+            `;
+        }
+
+        function createRoMiniItem(movie, index) {
+            return `
+                <div onclick="showMovieDetail('${slugSafe(movie.slug)}')" class="rp-mini-item">
+                    <div class="rp-mini-index">${index + 1}.</div>
+                    <img src="${getImg(movie.thumb_url || movie.poster_url)}" onerror="fallbackImg(this, '${escapeHtml(movie.thumb_url || movie.poster_url)}')" class="rp-mini-poster" alt="${escapeHtml(movie.name)}" />
+                    <div class="min-w-0">
+                        <div class="rp-mini-title">${escapeHtml(movie.name)}</div>
+                        <div class="text-[11px] text-gray-500 truncate">${escapeHtml(movie.origin_name || movie.episode_current || '')}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createRoLiveItem(movie, index) {
+            const names = ['Han Han', 'Lê Ngọc Hải', 'Admin Ryan', 'Mọt phim', 'Thành viên'];
+            const text = [
+                'Tập này hay quá, chờ tập sau.',
+                'Nội dung ổn hơn mình nghĩ.',
+                'Có ai xem đến đoạn cuối chưa?',
+                'Phim này hợp để cày cuối tuần.',
+                'Server mượt, hình đẹp.'
+            ];
+            return `
+                <div onclick="showMovieDetail('${slugSafe(movie.slug)}')" class="rp-live-item">
+                    <img src="${getImg(movie.thumb_url || movie.poster_url)}" onerror="fallbackImg(this, '${escapeHtml(movie.thumb_url || movie.poster_url)}')" class="rp-avatar" alt="avatar" />
+                    <div class="min-w-0">
+                        <div class="rp-live-name">${escapeHtml(names[index % names.length])} <span class="text-[#f5d56b]">∞</span></div>
+                        <div class="rp-live-text">▶ ${escapeHtml(text[index % text.length])}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadRoStyleBlocks() {
+            const [homeRes, movieRes] = await Promise.all([
+                fetchCached('home', 20),
+                fetchCached('danh-sach/phim-moi-cap-nhat?page=1', 20)
+            ]);
+            const homeItems = homeRes?.data?.items || [];
+            const fallbackItems = movieRes?.data?.items || [];
+            const items = (homeItems.length ? homeItems : fallbackItems).slice(0, 12);
+            if (!items.length) return;
+
+            const topBox = document.getElementById('roTopComments');
+            const popularBox = document.getElementById('roPopularList');
+            const favBox = document.getElementById('roFavoriteList');
+            const genreBox = document.getElementById('roHotGenres');
+            const liveBox = document.getElementById('roLiveComments');
+
+            if (topBox) topBox.innerHTML = items.slice(0, 5).map(createRoCommentCard).join('');
+            if (popularBox) popularBox.innerHTML = items.slice(0, 5).map(createRoMiniItem).join('') + '<button onclick="showCategory(\'danh-sach/phim-moi-cap-nhat\', \'Sôi nổi nhất\')" class="text-xs text-gray-500 hover:text-white mt-5 font-black">Xem thêm</button>';
+            if (favBox) favBox.innerHTML = items.slice(2, 7).map(createRoMiniItem).join('') + '<button onclick="showFavorites()" class="text-xs text-gray-500 hover:text-white mt-5 font-black">Xem thêm</button>';
+            if (genreBox) {
+                const hotGenres = (genres && genres.length ? genres.slice(0, 8) : [
+                    { name: 'Chính kịch', slug: 'chinh-kich' },
+                    { name: 'Tâm lý', slug: 'tam-ly' },
+                    { name: 'Hài hước', slug: 'hai-huoc' },
+                    { name: 'Tình cảm', slug: 'tinh-cam' },
+                    { name: 'Phiêu lưu', slug: 'phieu-luu' }
+                ]);
+                genreBox.innerHTML = hotGenres.map(g => `<button onclick="showCategory('the-loai/${escapeHtml(g.slug)}', '${escapeHtml(g.name)}')" class="rp-hot-chip">${escapeHtml(g.name)}</button>`).join('');
+            }
+            if (liveBox) liveBox.innerHTML = items.slice(4, 10).map(createRoLiveItem).join('');
         }
 
         async function loadDynamicMenus() {
